@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 
 #define FLIPO_ESP 1
@@ -16,15 +17,21 @@
 #define FLIPO_CHECKSUM 9
 
 int setsockopt(int optname, uint32_t optval, int optlen);
-int add_destination(int optval, int optlen);
-int add_length(int optlen);
-int add_ttl(int optlen);
+int add_version(uint32_t optva);
+int add_destination(uint32_t optval, int optlen);
+int add_length(uint32_t optva);
+int add_ttl(uint32_t optval);
+int add_flow(uint32_t optval);
+int add_source(uint32_t optval, int optlen);
+int add_protocol(uint32_t optval);
+int add_checksum(uint32_t optval);
 
-
+char* FLIP_construct_packet(char *bitmap, char *packet);
 //int flip_construct_header(flipHdr *flipPacket, uint16_t packet_len);
 //int flip_construct_packet(flipHdr *flipPacket, uint16_t packet_len);
 
-//char* FLIP_construct_bitmap (void);
+char* FLIP_construct_bitmap (void);
+char* itoa(int val, int base);
 
 /*
  * FLIP Meta-header
