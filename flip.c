@@ -5,16 +5,6 @@
 #include <stdint.h>
 
 
-/* int flip_construct_header(flipHdr *flipPacket, uint16_t packet_len)
-{
-	
-	flipPacket->flipHdr.version = 0;
-	flipPacket->flipHdr.lenght = htons(packet_len);
-	flipPacket->flipHdr.ttl;
-	
-	
-} */
-
 char* itoa(int val, int base){
 	
 	static char buf[32] = {0};
@@ -30,18 +20,25 @@ char* itoa(int val, int base){
 
 char* FLIP_construct_packet(char *bitmap, char *packet)
 {
+	char *send_string = malloc(500);
 	
-	flipHdr.version = 9;
-	char *send_string;
+	char *version = malloc(sizeof(uint8_t) + 1);
+	char *destination = malloc(sizeof(uint32_t) + 1);
+	char *length = malloc(sizeof(uint16_t) + 1);
+	char *ttl = malloc(sizeof(uint8_t) + 1);
+	char *flow = malloc(sizeof(uint32_t) + 1);
+	char *source = malloc(sizeof(uint32_t) + 1);
+	char *protocol = malloc(sizeof(uint8_t) + 1);
+	char *checksum = malloc(sizeof(uint16_t) + 1);
 	
-	char *version = itoa(flipHdr.version, 10);
-	char *destination = itoa(flipHdr.destination_addr, 10);
-	char *length = itoa(flipHdr.length, 10);
-	char *ttl = itoa(flipHdr.ttl, 10);
-	char *flow = itoa(flipHdr.flow, 10);
-	char *source = itoa(flipHdr.source_addr, 10);
-	char *protocol = itoa(flipHdr.protocol, 10);
-	char *checksum = itoa(flipHdr.checksum, 10);
+	version = itoa(flipHdr.version, 10);
+	destination = itoa(flipHdr.destination_addr, 10);
+	length = itoa(flipHdr.length, 10);
+	ttl = itoa(flipHdr.ttl, 10);
+	flow = itoa(flipHdr.flow, 10);
+	source = itoa(flipHdr.source_addr, 10);
+	protocol = itoa(flipHdr.protocol, 10);
+	checksum = itoa(flipHdr.checksum, 10);
 	
 	strcpy(send_string, bitmap);
 	strcat(send_string, version);
@@ -53,9 +50,8 @@ char* FLIP_construct_packet(char *bitmap, char *packet)
 	strcat(send_string, protocol);
 	strcat(send_string, checksum);
 	strcat(send_string, packet);
-	
-	printf("Version is: %s", version);
-	printf("String to send is: %s", send_string);
+
+	printf("String to send is: %s\n", send_string);
 }
 
 int setsockopt(int optname, uint32_t optval, int optlen)
