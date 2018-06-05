@@ -1,4 +1,13 @@
+/* name:
+ * authors:
+ * email:
+ *
+ * description:
+ *
+ */
 
+#ifndef EMBEDDED_FLIP
+#define EMBEDDED_FLIP
 
 int flip_construct_header(flipHdr *flipPacket, uint16_t packet_len);
 int flip_construct_packet(flipHdr *flipPacket, uint16_t packet_len);
@@ -49,3 +58,7 @@ typedef struct
 	uint8_t payload[packet_len];
 	
 } flipPkt;
+
+
+
+#endif
