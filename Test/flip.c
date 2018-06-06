@@ -98,7 +98,7 @@ char* FLIP_construct_bitmap (void)
 {
 	if (metaHdr.continuation1) {
 		// bitmap array of size 16
-		char *bitmap = (char *)malloc(16 + 1);
+		char *bitmap = (char *)malloc(sizeof(char)*16);
 		
 		printf("Initialized charater array:\n");
 		for (int i = 0; i < 16; i++){
@@ -148,7 +148,8 @@ char* FLIP_construct_bitmap (void)
 		return bitmap;
 		
 	}else{
-		char *bitmap = (char *)malloc(8 + 1);
+		char *bitmap = (char *)malloc(sizeof(char)*8);
+		bitmap[0] = '0';
 		
 		if (metaHdr.esp) {
 			bitmap[1] = '1';
