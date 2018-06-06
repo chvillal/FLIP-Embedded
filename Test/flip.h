@@ -21,18 +21,19 @@
 /* FUNCTION DECLARATIONS */
 uint32_t test_function(uint32_t num);
 
-int setsockopt(int optname, uint32_t optval, int optlen);
-int add_version(uint32_t optva);
-int add_destination(uint32_t optval, int optlen);
-int add_length(uint32_t optva);
-int add_ttl(uint32_t optval);
-int add_flow(uint32_t optval);
-int add_source(uint32_t optval, int optlen);
-int add_protocol(uint32_t optval);
-int add_checksum(uint32_t optval);
+int setsockopt (int optname, uint32_t optval, int optlen);
+int add_version (uint32_t optva);
+int add_destination (uint32_t optval, int optlen);
+int add_length (uint32_t optva);
+int add_ttl (uint32_t optval);
+int add_flow (uint32_t optval);
+int add_source (uint32_t optval, int optlen);
+int add_protocol (uint32_t optval);
+int add_checksum (uint32_t optval);
 
-char* FLIP_construct_packet(char *bitmap, char *packet);
 char* FLIP_construct_bitmap (void);
+char* FLIP_construct_header (void);
+char* FLIP_construct_packet (char *bitmap, char *header, char *payload);
 
 /*
  * FLIP Meta-header
@@ -40,7 +41,6 @@ char* FLIP_construct_bitmap (void);
 typedef struct
 {
 	bool continuation1;
-	bool continuation2;
 	bool esp;
 	bool version;
 	bool destination1;
@@ -48,10 +48,13 @@ typedef struct
 	bool length;
 	bool ttl;
 	bool flow;
+	bool continuation2;
 	bool source1;
 	bool source2;
 	bool protocol;
 	bool checksum;
+	
+	char *bitmap;
 	
 } meta_header;
 
@@ -83,6 +86,8 @@ typedef struct
 	uint8_t payload[256];
 	
 } flipPacket;
+
+
 
 
 

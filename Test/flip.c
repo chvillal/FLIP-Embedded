@@ -8,41 +8,169 @@ meta_header metaHdr;
 flipPacket flipPkt;
 flipHeader flipHdr;
 
-char* FLIP_construct_packet(char *bitmap, char *packet)
-{
-	char *send_string = malloc(500);
-	
-	char *version = malloc(sizeof(uint8_t) + 1);
-	char *destination = malloc(sizeof(uint32_t) + 1);
-	char *length = malloc(sizeof(uint16_t) + 1);
-	char *ttl = malloc(sizeof(uint8_t) + 1);
-	char *flow = malloc(sizeof(uint32_t) + 1);
-	char *source = malloc(sizeof(uint32_t) + 1);
-	char *protocol = malloc(sizeof(uint8_t) + 1);
-	char *checksum = malloc(sizeof(uint16_t) + 1);
-	
-	version = itoa(flipHdr.version, 10);
-	destination = itoa(flipHdr.destination_addr, 10);
-	length = itoa(flipHdr.length, 10);
-	ttl = itoa(flipHdr.ttl, 10);
-	flow = itoa(flipHdr.flow, 10);
-	source = itoa(flipHdr.source_addr, 10);
-	protocol = itoa(flipHdr.protocol, 10);
-	checksum = itoa(flipHdr.checksum, 10);
-	
-	strcpy(send_string, bitmap);
-	strcat(send_string, version);
-	strcat(send_string, destination);
-	strcat(send_string, length);
-	strcat(send_string, ttl);
-	strcat(send_string, flow);
-	strcat(send_string, source);
-	strcat(send_string, protocol);
-	strcat(send_string, checksum);
-	strcat(send_string, packet);
 
-	printf("String to send is: %s\n", send_string);
+char* FLIP_construct_bitmap (void)
+{
+	/* We want to send a one byte bitmap */
+	if (metaHdr.continuation1 == 0){
+		
+		// The first continuationo bit is off, initialize a bitmap of one byte
+		uint8_t bitmap = 0;
+		//printf("Bitmap is: %u\n", bitmap);
+		
+		// Construct the bitmap based on the meta header fields
+		if (metaHdr.esp){
+			bitmap = bitmap | 1 << 6;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.version){
+			bitmap = bitmap | 1 << 5;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.destination1){
+			bitmap = bitmap | 1 << 4;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.destination2){
+			bitmap = bitmap | 1 << 3;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.length){
+			bitmap = bitmap | 1 << 2;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.ttl){
+			bitmap = bitmap | 1 << 1;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.flow){
+			bitmap = bitmap | 1;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		
+		printf("Bitmap is: %u\n", bitmap);
+		
+		char *bitmap_string = (char*) malloc(sizeof(char) * (8+1));
+		
+		unsigned char byte1 = *((unsigned char *)&bitmap);
+
+		sprintf(bitmap_string, "%c", byte1);
+		printf("Unsigned: %u\n", byte1);
+		printf("Bytes: %c\n", byte1);
+	
+		printf("The string is: %s\n", bitmap_string);
+		
+		uint8_t b1 = bitmap_string[0];
+		printf("Unsigned int: %u\n", b1);
+		
+		return bitmap_string;
+		
+	/* We want to send a two byte bitmap */	
+	}else if (metaHdr.continuation1){
+		// The first continuationo bit is on, initialize a bitmap of two bytes
+		uint16_t bitmap = 32768;
+		//printf("Bitmap is: %u\n", bitmap);
+		
+		// Construct the bitmap based on the meta header fields
+		if (metaHdr.esp){
+			bitmap = bitmap | 1 << 14;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.version){
+			bitmap = bitmap | 1 << 13;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.destination1){
+			bitmap = bitmap | 1 << 12;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.destination2){
+			bitmap = bitmap | 1 << 11;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.length){
+			bitmap = bitmap | 1 << 10;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.ttl){
+			bitmap = bitmap | 1 << 9;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.flow){
+			bitmap = bitmap | 1 << 8;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.continuation2){
+			bitmap = bitmap | 1 << 7;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.source1){
+			bitmap = bitmap | 1 << 6;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.source2){
+			bitmap = bitmap | 1 << 5;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.protocol){
+			bitmap = bitmap | 1 << 4;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		if (metaHdr.checksum){
+			bitmap = bitmap | 1 << 3;
+			//printf("Bitmap is: %u\n", bitmap);
+		}
+		
+		printf("Bitmap is: %u\n", bitmap);
+		
+		char *bitmap_string = (char*) malloc(sizeof(char) * (16+1));
+		
+		unsigned char byte1 = *((unsigned char *)&bitmap + 1);
+		unsigned char byte2 = *((unsigned char *)&bitmap);
+
+		sprintf(bitmap_string, "%c%c", byte1, byte2);
+		printf("Unsigned: %u %u\n", byte1, byte2);
+		printf("Bytes: %c %c\n", byte1, byte2);
+	
+		printf("The string is: %s\n", bitmap_string);
+		
+		uint8_t b1 = bitmap_string[0] << 8 | bitmap_string[1];
+		printf("Unsigned int: %u\n", b1);
+		
+		return bitmap_string;
+	}
 }
+
+char* FLIP_construct_header (void)
+{
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 int setsockopt(int optname, uint32_t optval, int optlen)
 {
@@ -94,89 +222,7 @@ int setsockopt(int optname, uint32_t optval, int optlen)
 	return ret;
 }
 
-char* FLIP_construct_bitmap (void)
-{
-	if (metaHdr.continuation1) {
-		// bitmap array of size 16
-		char *bitmap = (char *)malloc(sizeof(char)*16);
-		
-		printf("Initialized charater array:\n");
-		for (int i = 0; i < 16; i++){
-			bitmap[i] = '0';
-			printf("%s\n\n", bitmap[i]);
-		}
-		
-		bitmap[0] = '1'; 
-		
-		if (metaHdr.esp) {
-			bitmap[1] = '1';
-		}
-		if (metaHdr.version) {
-			bitmap[2] = '1';
-		}
-		if (metaHdr.destination1) {
-			bitmap[3] = '1';
-		}
-		if (metaHdr.destination2) {
-			bitmap[4] = '1';
-		}
-		if (metaHdr.length) {
-			bitmap[5] = '1';
-		}
-		if (metaHdr.ttl) {
-			bitmap[6] = '1';
-		}
-		if (metaHdr.flow) {
-			bitmap[7] = '1';
-		}
-		if (metaHdr.continuation2){
-			bitmap[8] = '1';
-		}
-		if (metaHdr.source1) {
-			bitmap[9] = '1';
-		}
-		if (metaHdr.source2) {
-			bitmap[10] = '1';
-		}
-		if (metaHdr.protocol) {
-			bitmap[11] = '1';
-		}
-		if (metaHdr.checksum) {
-			bitmap[12] = '1';
-		}
-		
-		return bitmap;
-		
-	}else{
-		char *bitmap = (char *)malloc(sizeof(char)*8);
-		bitmap[0] = '0';
-		
-		if (metaHdr.esp) {
-			bitmap[1] = '1';
-		}
-		if (metaHdr.version) {
-			bitmap[2] = '1';
-		}
-		if (metaHdr.destination1) {
-			bitmap[3] = '1';
-		}
-		if (metaHdr.destination2) {
-			bitmap[4] = '1';
-		}
-		if (metaHdr.length) {
-			bitmap[5] = '1';
-		}
-		if (metaHdr.ttl) {
-			bitmap[6] = '1';
-		}
-		if (metaHdr.flow) {
-			bitmap[7] = '1';
-		}
-		
-		return bitmap;
-	}
-	
-}
+
 
 int add_destination(uint32_t optval, int optlen)
 {
