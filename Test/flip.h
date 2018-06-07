@@ -54,8 +54,6 @@ typedef struct
 	bool protocol;
 	bool checksum;
 	
-	char *bitmap;
-	
 } meta_header;
 
 
@@ -74,7 +72,7 @@ typedef struct
 	uint8_t protocol; 			/* Higher layer protocols. */
 	uint16_t checksum; 			/* FLIP header checksum. */
 	 
-} flipHeader;
+} flip_header;
 
 
 /*
@@ -82,7 +80,7 @@ typedef struct
  */
 typedef struct
 {
-	flipHeader headerField;
+	//flip_header headerField;
 	uint8_t payload[256];
 	
 } flipPacket;

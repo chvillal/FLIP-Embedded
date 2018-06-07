@@ -5,8 +5,7 @@
 #include <stdint.h>
 
 meta_header metaHdr;
-flipPacket flipPkt;
-flipHeader flipHdr;
+flip_header flipHdr;
 
 
 char* FLIP_construct_bitmap (void)
@@ -50,7 +49,7 @@ char* FLIP_construct_bitmap (void)
 		
 		printf("Bitmap is: %u\n", bitmap);
 		
-		char *bitmap_string = (char*) malloc(sizeof(char) * (8+1));
+		char *bitmap_string = (char *) malloc(sizeof(char) * (8+1));
 		
 		unsigned char byte1 = *((unsigned char *)&bitmap);
 
@@ -123,7 +122,7 @@ char* FLIP_construct_bitmap (void)
 		
 		printf("Bitmap is: %u\n", bitmap);
 		
-		char *bitmap_string = (char*) malloc(sizeof(char) * (16+1));
+		char *bitmap_string = (char *) malloc(sizeof(char) * (16+1));
 		
 		unsigned char byte1 = *((unsigned char *)&bitmap + 1);
 		unsigned char byte2 = *((unsigned char *)&bitmap);
@@ -132,9 +131,9 @@ char* FLIP_construct_bitmap (void)
 		printf("Unsigned: %u %u\n", byte1, byte2);
 		printf("Bytes: %c %c\n", byte1, byte2);
 	
-		printf("The string is: %s\n", bitmap_string);
+		printf("The string is: {%s}\n", bitmap_string);
 		
-		uint8_t b1 = bitmap_string[0] << 8 | bitmap_string[1];
+		uint16_t b1 = (uint8_t)bitmap_string[0] << 8 | (uint8_t)bitmap_string[1];
 		printf("Unsigned int: %u\n", b1);
 		
 		return bitmap_string;
@@ -143,40 +142,206 @@ char* FLIP_construct_bitmap (void)
 
 char* FLIP_construct_header (void)
 {
+	char *header_string = (char *) malloc(sizeof(char) * 249);
 	
+	if (metaHdr.version){
+		char version_string[10];
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.version);
+
+		sprintf(version_string, "%c", byte1);
+		printf("Unsigned: %u\n", byte1);
+		printf("Bytes: %c\n", byte1);
 	
+		printf("The version string is: %s\n", version_string);
+		
+		uint8_t b1 = (uint8_t)version_string[0];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		
+		
+		strcat(header_string, version_string);
+	}
+	
+	if (metaHdr.destination1){
+		char destination_string[100];
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.destination_addr + 3);
+		unsigned char byte2 = *((unsigned char *)&flipHdr.destination_addr + 2);
+		unsigned char byte3 = *((unsigned char *)&flipHdr.destination_addr + 1);
+		unsigned char byte4 = *((unsigned char *)&flipHdr.destination_addr);
+
+		sprintf(destination_string, "%c%c%c%c", byte1, byte2, byte3, byte4);
+		printf("Unsigned: %u %u %u %u\n", byte1, byte2, byte3, byte4);
+		printf("Bytes: %c %c %c %c\n", byte1, byte2, byte3, byte4);
+	
+		printf("The destination string is: %s\n", destination_string);
+		
+		uint32_t b1 = (uint8_t)destination_string[0] <<  24 | (uint8_t)destination_string[1] << 16 | (uint8_t)destination_string[2] << 8 | (uint8_t)destination_string[3];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		strcat(header_string, destination_string);
+	}
+	
+	if (metaHdr.destination2){
+		
+		uint16_t dest_addr = (uint16_t) flipHdr.destination_addr;
+		char destination_string[16];
+		
+		unsigned char byte1 = *((unsigned char *)&dest_addr + 1);
+		unsigned char byte2 = *((unsigned char *)&dest_addr);
+
+		sprintf(destination_string, "%c%c", byte1, byte2);
+		printf("Unsigned: %u %u\n", byte1, byte2);
+		printf("Bytes: %c %c\n", byte1, byte2);
+	
+		printf("The destination string is: %s\n", destination_string);
+		
+		uint16_t b1 = (uint8_t)destination_string[0] << 8 | (uint8_t)destination_string[1];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		strcat(header_string, destination_string);
+	}
+	
+	if (metaHdr.length){
+		char length_string[18];
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.length + 1);
+		unsigned char byte2 = *((unsigned char *)&flipHdr.length);
+
+		sprintf(length_string, "%c%c", byte1, byte2);
+		printf("Unsigned: %u %u\n", byte1, byte2);
+		printf("Bytes: %c %c\n", byte1, byte2);
+	
+		printf("The length string is: %s\n\n", length_string);
+		
+		uint16_t b1 = (uint8_t)length_string[0] << 8 | (uint8_t)length_string[1];
+		printf("Unsigned int: %u\n", b1);
+		
+		strcat(header_string, length_string);
+	}
+	
+	if (metaHdr.ttl){
+		char ttl_string[10];
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.ttl);
+
+		sprintf(ttl_string, "%c", byte1);
+		printf("Unsigned: %u\n", byte1);
+		printf("Bytes: %c\n", byte1);
+	
+		printf("The ttl string is: %s\n", ttl_string);
+		
+		uint8_t b1 = (uint8_t)ttl_string[0];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		strcat(header_string, ttl_string);
+	}
+	
+	if (metaHdr.flow){
+		char flow_string[33] = {0};
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.flow + 3);
+		unsigned char byte2 = *((unsigned char *)&flipHdr.flow + 2);
+		unsigned char byte3 = *((unsigned char *)&flipHdr.flow + 1);
+		unsigned char byte4 = *((unsigned char *)&flipHdr.flow);
+
+		
+		sprintf(flow_string, "%c%c%c%c", byte1, byte2, byte3, byte4);
+		printf("Unsigned: %u %u %u %u\n", byte1, byte2, byte3, byte4);
+		printf("Bytes: %c %c %c %c\n", byte1, byte2, byte3, byte4);
+		
+		printf("The flow string is: %s\n", flow_string);
+		
+		uint32_t b1 = (uint8_t)flow_string[0] <<  24 | (uint8_t)flow_string[1] << 16 | (uint8_t)flow_string[2] << 8 | (uint8_t)flow_string[3];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		strcat(header_string, flow_string);
+	}
+	
+	if (metaHdr.source1){
+		char source_string[33];
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.source_addr + 3);
+		unsigned char byte2 = *((unsigned char *)&flipHdr.source_addr + 2);
+		unsigned char byte3 = *((unsigned char *)&flipHdr.source_addr + 1);
+		unsigned char byte4 = *((unsigned char *)&flipHdr.source_addr);
+
+		sprintf(source_string, "%c%c%c%c", byte1, byte2, byte3, byte4);
+		printf("Unsigned: %u %u %u %u\n", byte1, byte2, byte3, byte4);
+		printf("Bytes: %c %c %c %c\n", byte1, byte2, byte3, byte4);
+	
+		printf("The source string is: %s\n", source_string);
+		
+		uint32_t b1 = (uint8_t)source_string[0] <<  24 | (uint8_t)source_string[1] << 16 | (uint8_t)source_string[2] << 8 | (uint8_t)source_string[3];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		strcat(header_string, source_string);
+	}
+	
+	if (metaHdr.source2){
+		char source_string[18];
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.source_addr + 1);
+		unsigned char byte2 = *((unsigned char *)&flipHdr.source_addr);
+
+		sprintf(source_string, "%c%c", byte1, byte2);
+		printf("Unsigned: %u %u\n", byte1, byte2);
+		printf("Bytes: %c %c\n", byte1, byte2);
+	
+		printf("The source string is: %s\n", source_string);
+		
+		uint16_t b1 = (uint8_t)source_string[0] << 8 | (uint8_t)source_string[1];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		strcat(header_string, source_string);
+	}
+	
+	if (metaHdr.protocol){
+		char protocol_string[10];
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.protocol);
+
+		sprintf(protocol_string, "%c", byte1);
+		printf("Unsigned: %u\n", byte1);
+		printf("Bytes: %c\n", byte1);
+	
+		printf("The protocol string is: %s\n", protocol_string);
+		
+		uint8_t b1 = (uint8_t)protocol_string[0];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		strcat(header_string, protocol_string);
+	}
+	
+	if (metaHdr.checksum){
+		char checksum_string[18];
+		
+		unsigned char byte1 = *((unsigned char *)&flipHdr.checksum + 1);
+		unsigned char byte2 = *((unsigned char *)&flipHdr.checksum);
+
+		sprintf(checksum_string, "%c%c", byte1, byte2);
+		printf("Unsigned: %u %u\n", byte1, byte2);
+		printf("Bytes: %c %c\n", byte1, byte2);
+	
+		printf("The checksum string is: %s\n", checksum_string);
+		
+		uint16_t b1 = (uint8_t)checksum_string[0] << 8 | (uint8_t)checksum_string[1];
+		printf("Unsigned int: %u\n\n", b1);
+		
+		strcat(header_string, checksum_string);
+	}
+	printf("Header: %s\n", header_string);
+	
+	return header_string;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 int setsockopt(int optname, uint32_t optval, int optlen)
 {
 	int ret;
 	
-	switch(optname) {
+	switch (optname) {
 
 		case FLIPO_ESP:
 			printf("Not implemented yet\n");
