@@ -10,16 +10,22 @@
 #include "flip.h"
 
 /* DEFINES */
-#define SO_DST_SIZE_2 0x18
-#define SO_VER 
-#define SO_SRC
-#define SO_LEN
-#define SO_TTL
-#define SO_FLOW
-#define SO_PROTOCOL
-#define SO_CRC
-#define SO_ESP
-#define CONT_BIT 0x80
+#define BITMASK_DST_SIZE_2	0x08
+#define BITMASK_DST_SIZE_4	0x10
+#define BITMASK_DST_SIZE_16	0x18
+#define BITMASK_VER			0x20
+#define BITMASK_SRC_SIZE_2	0x20
+#define BITMASK_SRC_SIZE_4	0x40
+#define BITMASK_SRC_SIZE_16 0x60
+#define BITMASK_LEN			0x04
+#define BITMASK_TTL			0x02
+#define BITMASK_FLOW		0x01
+#define BITMASK_PROTOCOL	0x10
+#define BITMASK_CRC			0x08
+#define BITMASK_ESP			0x40
+#define BITMASK_CONT		0x80
+
+#define BITMAP_MAX_LEN		2
 
 
 #define MAX_STR_SIZE 128 //temporary, not sure what max lora string len is...
@@ -53,127 +59,199 @@ int flip_construct_packet(flipHdr *flipPacket, uint16_t packet_len);
 
 
 
-/** GET SOCKET OPTIONS - RECEIVING END **/
+/** GET SOCKET OPTIONS - RECEIVING END FUNCTIONS **/
 
-//temp name, receives entire message string from radio. then reads header
-// fields, saves options, and returns payload string.
-
+/*
+ * Receives raw string BUFF from radio. reads FLIP bitmap and then parses 
+ * corresponding values. Saves ptr where payload starts in string.
+ *
+ * returns 0 if parsed successfully, 1 if esp packet,
+ * or -1 if error.
+ *
+ */
 int flip_parse_packet(char *buff, int buff_len, char *payload ){
 	int i = 0;
-	int j = 0;
-	int dst_size;
-	uint8_t bitmap = buff[i];
+	int dst_size = 0;
+	int src_size = 0;	
 	
-	//reset bitmap and header values in buffer structs
+	//reset bitmap and header values in buffer struct
 	reset_bitmap(&rcv_bitmap);
 	reset_header(&rcv_header_values);
 	
-	//start reading bit map
-	if (bitmap & SO_ESP){
+	//start reading bitmap
+	if (read_bitmap(buff, &i, &dst_size, &src_size) > 0)
+		return 1; // ESP packet, done parsing.
+	
+	//start reading header values
+	read_header_values(buff, &i, dst_size, src_size);
+	
+	//store start address of they payload (ptr)
+	payload = buff + i;
+	
+	return 0; // no errors.
+}
+
+
+/*
+ * reads very first bytes of a passed string. translates bitmap into
+ * corresponding boolean flags. 
+ * returns 1 if esp packet, 0 if no errors, -1 on error
+ */
+int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
+		
+	uint8_t bitmap = (uint8_t) buff[*i];
+	
+	if (bitmap & BITMASK_ESP){
 		rcv_bitmap.esp = true;
-		//do something
-		payload = buff + i;
-		return 1; // no errors.
+		// ESP detected, notify caller
+		return 1; 
 	}
 	
-	if (bitmap & SO_VER){
+	if (bitmap & BITMASK_VER){
 		rcv_bitmap.version = true;
 	}
 	
-	if (bitmap & SO_DST){
-		rcv_bitmap.destination = true;
-		
-		//compute and save size
-		dst_size = 2;
+	if (bitmap & BITMASK_DST_SIZE_16){
+		rcv_bitmap.destination = true;	
+			
+		if ((bitmap & BITMASK_DST_SIZE_2) == BITMASK_DST_SIZE_2)
+			*dst_size = 2;
+		if ((bitmap & BITMASK_DST_SIZE_4) == BITMASK_DST_SIZE_4)
+			*dst_size = 4;
+		if ((bitmap & BITMASK_DST_SIZE_16) == BITMASK_DST_SIZE_16)
+			*dst_size = 16;
 	}
 	
-	if (bitmap & SO_LEN){
+	if (bitmap & BITMASK_LEN){
 		rcv_bitmap.lenght = true;
 	}
 	
-	if (bitmap & SO_TTL){
+	if (bitmap & BITMASK_TTL){
 		rcv_bitmap.ttl = true;
 	}
 	
-	if (bitmap & SO_FLOW){
+	if (bitmap & BITMASK_FLOW){
 		rcv_bitmap.flow = true;
 	}
 	
-	if (bitmap & CONT_BIT){
-		i++;
-		bitmap = buff[i];
+	if (bitmap & BITMASK_CONT){
+		*i += *i + 1;
+		bitmap = (uint8_t) buff[i];
 		
-		if (bitmap & SO_SRC){
+		if (bitmap & BITMASK_SRC_SIZE_16){
 			rcv_bitmap.source = true;
-			//compute and save size
+			
+			if ((bitmap & BITMASK_SRC_SIZE_2) == BITMASK_SRC_SIZE_2)
+				*src_size = 2;
+			if ((bitmap & BITMASK_SRC_SIZE_4) == BITMASK_SRC_SIZE_4)
+				*src_size = 4;
+			if ((bitmap & BITMASK_SRC_SIZE_16) == BITMASK_SRC_SIZE_16)
+				*src_size = 16;
 		}
 		
-		if (bitmap & SO_PROTOCOL){
+		if (bitmap & BITMASK_PROTOCOL){
 			rcv_bitmap.protocol = true;
 		}
 		
-		if (bitmap & SO_CRC){
+		if (bitmap & BITMASK_CRC){
 			rcv_bitmap.checksum = true;
 		}
 	}
 	
-	//start reading header values
-	i++; //point to next byte, values start
-	if ( rcv_bitmap.version){
+	// move index to point to next byte
+	*i += *i +1;
+	
+	return 0;
+}
 
+
+/*
+ * reads header values flagged by rcv_bitmap struct in sequential oder,
+ * stores values in rcv_header_values struct. 
+ *
+ * index i should point to the first byte of header values.
+ *
+ * returns 0 if successful, or -1 if error
+ */
+int read_header_values(char *buff, int *i, int dst_size, int src_size){
+	int j = *i;
+	
+	if ( rcv_bitmap.version){
 		//1 byte long
-		rcv_header_values.version = buff[i];
-		i++;
+		rcv_header_values.version = (uint8_t) buff[j];
+		j++;
 	}
 	
-	if ( rcv_bitmap.destination){ // ***** NEEDS LOGIC TO DETERMINE PROPER VALUE SIZE
-		
-		//2 bytes long
-
-		rcv_header_values.destination_addr = buff[i] << 8 | buff[i+1] ;
-		i += 2;
+	if ( rcv_bitmap.destination){		
+		//2-16 bytes long
+		if ( dst_size == 2) {
+			rcv_header_values.destination_addr = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1] ;
+			j +=2;
+		} 
+		if ( dst_size == 4) {
+			rcv_header_values.destination_addr = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] << 16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
+			j +=4;
+		}
+		if ( dst_size == 16) {
+		//	rcv_header_values.destination_addr = buff[j] << 24 | buff[j+1] << 16 | buff[j+2] << 8 | buff[j+3]
+		//										 buff[j+4] << 24 | buff[j+5] << 16 | buff[j+6] << 8 | buff[j+7]
+		//										 buff[j+8] << 24 | buff[j+9] << 16 | buff[j+10] << 8 | buff[j+11]
+		//										 buff[j+12] << 24 | buff[j+13] << 16 | buff[j+14] << 8 | buff[j+15];
+			j +=16;
+		}
 	}
 	
 	if ( rcv_bitmap.lenght){
-
 		// 2 bytes long
-		rcv_header_values.lenght = buff[i] << 8 | buff[i+1];
-		i += 2;
+		rcv_header_values.lenght = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1];
+		j +=2;
 	}
 	
 	if ( rcv_bitmap.ttl){
-		
-		rcv_header_values.ttl = buff[i];
-		i++;
+		//1 byte long
+		rcv_header_values.ttl = (uint8_t)buff[j];
+		j++;
 	}
 	
-	if ( rcv_bitmap.flow){ // ***** NEEDS LOGIC TO DETERMINE PROPER VALUE SIZE
-		
-		rcv_header_values.flow = buff[i] << 24 | buff[i+1] <<16 | buff[i+2] << 8 | buff[i+3] ;
-		i += 4;
+	if ( rcv_bitmap.flow){ 
+		// 4 bytes long
+		rcv_header_values.flow = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] <<16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
+		j +=4;
 	}
 	
-	if ( rcv_bitmap.source){
-		
-		rcv_header_values.source_addr = buff[i] << 8 | buff[i+1] ;
-		i += 2;
+	if ( rcv_bitmap.source){ 
+		// 2-16 bytes long
+		if ( src_size == 2) {
+			rcv_header_values.source_addr = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1] ;
+			j +=2;
+		}
+		if ( src_size == 4) {
+			rcv_header_values.source_addr = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] << 16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
+			j +=4;
+		}
+		if ( src_size == 16) {
+			//	rcv_header_values.source_addr = buff[j] << 24 | buff[j+1] << 16 | buff[j+2] << 8 | buff[j+3]
+			//										 buff[j+4] << 24 | buff[j+5] << 16 | buff[j+6] << 8 | buff[j+7]
+			//										 buff[j+8] << 24 | buff[j+9] << 16 | buff[j+10] << 8 | buff[j+11]
+			//										 buff[j+12] << 24 | buff[j+13] << 16 | buff[j+14] << 8 | buff[j+15];
+			j +=16;
+		}
 	}
 	
 	if ( rcv_bitmap.protocol){
-		rcv_header_values.protocol = buff[i];
-		i++;
+		// 1 byte long
+		rcv_header_values.protocol = (uint8_t)buff[j];
+		j++;
 	}
 	
 	if ( rcv_bitmap.checksum){
-		
-		rcv_header_values.checksum =  buff[i] << 8 | buff[i+1];
-		i += 2;
+		// 2 bytes long
+		rcv_header_values.checksum =  (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1];
+		j +=2;
 	}
 	
-	//return payload?
-	payload = buff + i;
-	
-	return 1; // no errors.
+	i* = j;
+	return 0;
 }
 
 /*
@@ -207,4 +285,46 @@ void reset_header(struct flipHdr *header_values){
 	header_values->version = 0;
 }
 
+int get_bitmap_str(char *packet, char *str, int str_len){
+	uint8_t bitmap;
+	int i,j;
+	
+	//needs at least 16 bytes + 1 (null)
+	if (str_len < 17)
+		return -1;
+	
+	//iterated for number of bytes in bitmap (1-2)	
+	for (i=0; i< BITMAP_MAX_LEN; i++){
+		bitmap = (uint8_t)packet[i];
+		
+		//iterate 8 times, store bit value in string
+		for (j=0; j< 8; j++){
+			strcat(str, " ");
+			
+			if (( bitmap & (1<< 8-j)) > 0)
+				strcat(str, "1");				
+			else
+				strcat(str, "0");
+		}
+		
+		//if no more continuation bytes, done, exit
+		if (( bitmap & (1<<8)) == 0)
+			break;
+	}
+	
+	return 0;
+}
 
+//int get_headervals_str(char *str, int str_len){
+	//char vals[64];
+	//
+	//// 109 in max val characters + 5*8 definitions + 1 null
+	//if (str_len < 200 )
+	//return -1;
+	//
+	//if (rcv_header_values.version > 0 ){
+		//sprintf(vals, "VER: %u ", rcv_header_values.version)
+		//strcat(str, vals);
+	//}
+	//
+//}
