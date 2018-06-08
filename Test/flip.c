@@ -355,7 +355,6 @@ char* FLIP_construct_header (void)
 	return header_string;
 }
 
-
 int setsockopt(int optname, uint32_t optval, int optlen)
 {
 	int ret;
