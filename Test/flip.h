@@ -18,6 +18,7 @@
 #define FLIPO_PROTOCOL 9 
 #define FLIPO_CHECKSUM 10
 
+
 /* FUNCTION DECLARATIONS */
 uint32_t test_function(uint32_t num);
 
@@ -34,6 +35,14 @@ int add_checksum (uint32_t optval);
 char* FLIP_construct_bitmap (void);
 char* FLIP_construct_header (void);
 char* FLIP_construct_packet (char *bitmap, char *header, char *payload);
+
+int flip_parse_packet(char *buff, int buff_len, char *payload );
+int read_bitmap(char *buff, int *i, int *dst_size, int *src_size); 
+int read_header_values(char *buff, int *i, int dst_size, int src_size);
+void reset_bitmap(struct meta_header *bitmap);
+void reset_header(struct flipHdr *header_values);
+
+int get_bitmap_str(char *packet, char *str, int str_len);
 
 /*
  * FLIP Meta-header
