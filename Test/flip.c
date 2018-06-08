@@ -182,7 +182,7 @@ char* FLIP_construct_header (void)
 		strcat(header_string, version_string);
 	}
 	
-	if (metaHdr.destination1){
+	if (metaHdr.destination1 && !metaHdr.destination2){
 		char destination_string[100];
 		
 		unsigned char byte1 = *((unsigned char *)&flipHdr.destination_addr + 3);
@@ -202,7 +202,7 @@ char* FLIP_construct_header (void)
 		strcat(header_string, destination_string);
 	}
 	
-	if (metaHdr.destination2){
+	if (metaHdr.destination2 && !metaHdr.destination1){
 		
 		uint16_t dest_addr = (uint16_t) flipHdr.destination_addr;
 		char destination_string[16];
@@ -354,6 +354,20 @@ char* FLIP_construct_header (void)
 	
 	return header_string;
 }
+
+char* FLIP_construct_packet (char *bitmap, char *header, char *payload)
+{
+	char *packet_string = (char *) malloc(sizeof(char) * 249);
+	
+	strcat(packet_string, bitmap);
+	strcat(packet_string, header);
+	strcat(packet_string, payload);
+	
+	printf("Packet is: %s\n", packet_string);
+	
+	return packet_string;
+}
+
 
 int setsockopt(int optname, uint32_t optval, int optlen)
 {
