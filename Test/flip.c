@@ -766,7 +766,7 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 	//iterated for number of bytes in bitmap (1-2)	
 	for (i=0; i< BITMAP_MAX_LEN; i++){
 		bitmap = (uint8_t) packet[i];
-		printf("Inside bitmapRead: %u\n", bitmap);
+		//printf("Inside bitmapRead: %u\n", bitmap);
 		
 		//iterate 8 times, store bit value in string
 		for (j=0; j< 8; j++){
@@ -799,3 +799,17 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 	//}
 	//
 //}
+
+void read_rcv_values(void){
+		
+	printf("\n** PRINTING RCV VALUES STRUCT **\n")
+	printf("VER: %u\n", rcv_header_values.version);
+	printf("LEN: %u\n", rcv_header_values.length);
+	printf("TTL: %u\n", rcv_header_values.ttl);
+	printf("FLW: %u\n", rcv_header_values.flow);
+	printf("SRC: %u\n", rcv_header_values.source_addr);
+	printf("DST: %u\n", rcv_header_values.destination_addr);
+	printf("PRO: %u\n", rcv_header_values.protocol);
+	printf("CRC: %u\n\n", rcv_header_values.checksum);
+
+}
