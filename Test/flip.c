@@ -753,6 +753,7 @@ void reset_header(flip_header *header_values){
 	header_values->version = 0;
 }
 
+
 int get_bitmap_str(char *packet, char *str, int str_len){
 	uint8_t bitmap;
 	int i,j;
@@ -763,13 +764,14 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 	
 	//iterated for number of bytes in bitmap (1-2)	
 	for (i=0; i< BITMAP_MAX_LEN; i++){
-		bitmap = (uint8_t)packet[i];
+		bitmap = (uint8_t) packet[i];
+		printf("Inside bitmapRead: %u\n", bitmap);
 		
 		//iterate 8 times, store bit value in string
 		for (j=0; j< 8; j++){
-			strcat(str, " ");
+			//strcat(str, " ");
 			
-			if (( bitmap & (1<< 8-j)) > 0)
+			if (( bitmap & (1<< 7-j)) > 0)
 				strcat(str, "1");				
 			else
 				strcat(str, "0");
