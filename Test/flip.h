@@ -39,8 +39,7 @@ char* FLIP_construct_packet (char *bitmap, char *header, char *payload);
 int flip_parse_packet(char *buff, int buff_len, char *payload );
 int read_bitmap(char *buff, int *i, int *dst_size, int *src_size); 
 int read_header_values(char *buff, int *i, int dst_size, int src_size);
-void reset_bitmap(struct meta_header *bitmap);
-void reset_header(struct flipHdr *header_values);
+
 
 int get_bitmap_str(char *packet, char *str, int str_len);
 
@@ -95,7 +94,8 @@ typedef struct
 } flipPacket;
 
 
-
+void reset_bitmap(meta_header *bitmap);
+void reset_header(flip_header *header_values);
 
 
 #endif // FLIP_H_

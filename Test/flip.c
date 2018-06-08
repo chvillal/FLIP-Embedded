@@ -601,7 +601,7 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
 	
 	if (bitmap & BITMASK_CONT){
 		*i += *i + 1;
-		bitmap = (uint8_t) buff[i];
+		bitmap = (uint8_t) buff[*i];
 		
 		if (bitmap & BITMASK_SRC_SIZE_16){
 			rcv_bitmap.source1 = true;
@@ -716,14 +716,14 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 		j +=2;
 	}
 	
-	i* = j;
+	*i = j;
 	return 0;
 }
 
 /*
  * Resets all flags of BITMAP to false.
  */
-void reset_bitmap(struct meta_header *bitmap){
+void reset_bitmap(meta_header *bitmap){
 	
 	bitmap->checksum = false;
 	bitmap->destination1 = false;
@@ -741,7 +741,7 @@ void reset_bitmap(struct meta_header *bitmap){
 /*
  * Resets all values of the header HEADER_VALUES to 0.
  */
-void reset_header(struct flipHdr *header_values){
+void reset_header(flip_header *header_values){
 	
 	header_values->checksum = 0;
 	header_values->destination_addr = 0;
