@@ -758,6 +758,8 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 	uint8_t bitmap;
 	int i,j;
 	
+	memset( str, '\0', str_len);
+	
 	//needs at least 16 bytes + 1 (null)
 	if (str_len < 17)
 		return -1;
