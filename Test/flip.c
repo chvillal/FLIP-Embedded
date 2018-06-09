@@ -161,7 +161,12 @@ char* FLIP_construct_bitmap (void)
 
 char* FLIP_construct_header (void)
 {
-	char *header_string = (char *) malloc(sizeof(char) * 249);
+	char *header_string = (char *) malloc(sizeof(char) * 20);
+	memset(header_string, '\0', sizeof(header_string));
+	
+	int index = 0;
+	
+	printf("\n\nConstructing header\n");
 	
 	if (metaHdr.version){
 		char version_string[10];
@@ -178,8 +183,13 @@ char* FLIP_construct_header (void)
 		printf("Unsigned int: %u\n\n", b1);
 		
 		
-		
-		strcat(header_string, version_string);
+		mod_strncat(header_string, version_string, 1, &index);
+		printf("Printing header string in hex:\n");
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
+
 	}
 	
 	if (metaHdr.destination1 && !metaHdr.destination2){
@@ -199,7 +209,13 @@ char* FLIP_construct_header (void)
 		uint32_t b1 = (uint8_t)destination_string[0] <<  24 | (uint8_t)destination_string[1] << 16 | (uint8_t)destination_string[2] << 8 | (uint8_t)destination_string[3];
 		printf("Unsigned int: %u\n\n", b1);
 		
-		strcat(header_string, destination_string);
+		
+		mod_strncat(header_string, destination_string, 4, &index);
+		printf("Printing header string in hex:\n");
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
 	}
 	
 	if (metaHdr.destination2 && !metaHdr.destination1){
@@ -219,7 +235,10 @@ char* FLIP_construct_header (void)
 		uint16_t b1 = (uint8_t)destination_string[0] << 8 | (uint8_t)destination_string[1];
 		printf("Unsigned int: %u\n\n", b1);
 		
-		strcat(header_string, destination_string);
+		
+		mod_strncat(header_string, destination_string, 2, &index);
+		printf("Printing header string in hex:\n");
+		
 	}
 	
 	if (metaHdr.length){
@@ -235,9 +254,19 @@ char* FLIP_construct_header (void)
 		printf("The length string is: %s\n\n", length_string);
 		
 		uint16_t b1 = (uint8_t)length_string[0] << 8 | (uint8_t)length_string[1];
-		printf("Unsigned int: %u\n", b1);
+		printf("Unsigned int: %u\n\n", b1);
+		printf("Just the length string in hex:\n");
+		for (int i = 0; i < 2; i ++) {
+			printf(" %02x", length_string[i]);
+		}
+		printf("\n");
 		
-		strcat(header_string, length_string);
+		mod_strncat(header_string, length_string, 2, &index);
+		printf("Printing header string in hex:\n");
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
 	}
 	
 	if (metaHdr.ttl){
@@ -254,7 +283,12 @@ char* FLIP_construct_header (void)
 		uint8_t b1 = (uint8_t)ttl_string[0];
 		printf("Unsigned int: %u\n\n", b1);
 		
-		strcat(header_string, ttl_string);
+		
+		mod_strncat(header_string, ttl_string, 1, &index);
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
 	}
 	
 	if (metaHdr.flow){
@@ -275,7 +309,11 @@ char* FLIP_construct_header (void)
 		uint32_t b1 = (uint8_t)flow_string[0] <<  24 | (uint8_t)flow_string[1] << 16 | (uint8_t)flow_string[2] << 8 | (uint8_t)flow_string[3];
 		printf("Unsigned int: %u\n\n", b1);
 		
-		strcat(header_string, flow_string);
+		mod_strncat(header_string, flow_string, 4, &index);
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
 	}
 	
 	if (metaHdr.source1){
@@ -295,7 +333,11 @@ char* FLIP_construct_header (void)
 		uint32_t b1 = (uint8_t)source_string[0] <<  24 | (uint8_t)source_string[1] << 16 | (uint8_t)source_string[2] << 8 | (uint8_t)source_string[3];
 		printf("Unsigned int: %u\n\n", b1);
 		
-		strcat(header_string, source_string);
+		mod_strncat(header_string, source_string, 4, &index);
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
 	}
 	
 	if (metaHdr.source2){
@@ -313,7 +355,11 @@ char* FLIP_construct_header (void)
 		uint16_t b1 = (uint8_t)source_string[0] << 8 | (uint8_t)source_string[1];
 		printf("Unsigned int: %u\n\n", b1);
 		
-		strcat(header_string, source_string);
+		mod_strncat(header_string, source_string, 2, &index);
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
 	}
 	
 	if (metaHdr.protocol){
@@ -330,7 +376,11 @@ char* FLIP_construct_header (void)
 		uint8_t b1 = (uint8_t)protocol_string[0];
 		printf("Unsigned int: %u\n\n", b1);
 		
-		strcat(header_string, protocol_string);
+		mod_strncat(header_string, protocol_string, 1, &index);
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
 	}
 	
 	if (metaHdr.checksum){
@@ -348,22 +398,41 @@ char* FLIP_construct_header (void)
 		uint16_t b1 = (uint8_t)checksum_string[0] << 8 | (uint8_t)checksum_string[1];
 		printf("Unsigned int: %u\n\n", b1);
 		
-		strcat(header_string, checksum_string);
+		mod_strncat(header_string, checksum_string, 2, &index);
+		for (int i = 0; i < sizeof(header_string); i ++) {
+			printf(" %02x", header_string[i]);
+		}
+		printf("\n");
 	}
+	
+	printf("\n");
 	printf("Header: %s\n", header_string);
+	for (int i = 0; i < sizeof(header_string); i ++) {
+		printf(" %02x", header_string[i]);
+	}
+	printf("\n");
+	
+	
+	flipHdr.header_len = index;
+	
 	
 	return header_string;
 }
 
 char* FLIP_construct_packet (char *bitmap, char *header, char *payload)
 {
-	char *packet_string = (char *) malloc(sizeof(char) * 249);
+	char *packet_string = (char *) malloc(sizeof(char) * 500);
 	
-	strcat(packet_string, bitmap);
-	strcat(packet_string, header);
-	strcat(packet_string, payload);
+	memset(packet_string, '\0', sizeof(packet_string));
+	
+	int index = 0;
+	
+	mod_strncat(packet_string, bitmap, strlen(bitmap), &index);
+	mod_strncat(packet_string, header, flipHdr.header_len, &index);
+	mod_strncat(packet_string, payload, strlen(payload), &index);
 	
 	printf("Packet is: %s\n", packet_string);
+	printf("Index is: %d\n", index);
 	
 	return packet_string;
 }
@@ -816,7 +885,7 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 
 void read_rcv_values(void){
 		
-	printf("\n** PRINTING RCV VALUES STRUCT **\n")
+	printf("\n** PRINTING RCV VALUES STRUCT **\n");
 	printf("VER: %u\n", rcv_header_values.version);
 	printf("LEN: %u\n", rcv_header_values.length);
 	printf("TTL: %u\n", rcv_header_values.ttl);
@@ -826,4 +895,18 @@ void read_rcv_values(void){
 	printf("PRO: %u\n", rcv_header_values.protocol);
 	printf("CRC: %u\n\n", rcv_header_values.checksum);
 
+}
+
+char* mod_strncat(char *dest, const char *src, size_t n, int *index)
+{
+    //size_t dest_len = strlen(dest);
+    size_t i;
+
+	for (i = 0; i < n; i++){
+        dest[*index + i] = src[i];
+	}
+   dest[*index + i] = '\0';
+
+   *index += n;
+   return dest;
 }
