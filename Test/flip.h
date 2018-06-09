@@ -40,8 +40,10 @@ int flip_parse_packet(char *buff, int buff_len, char *payload );
 int read_bitmap(char *buff, int *i, int *dst_size, int *src_size); 
 int read_header_values(char *buff, int *i, int dst_size, int src_size);
 
-
+void read_rcv_values(void);
 int get_bitmap_str(char *packet, char *str, int str_len);
+
+char* mod_strncat(char *dest, const char *src, size_t n, int *index);
 
 /*
  * FLIP Meta-header
@@ -79,7 +81,9 @@ typedef struct
 	uint32_t destination_addr;  /* FLIP destination address. */
 	uint8_t protocol; 			/* Higher layer protocols. */
 	uint16_t checksum; 			/* FLIP header checksum. */
-	 
+	
+	int header_len;
+	
 } flip_header;
 
 
