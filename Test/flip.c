@@ -897,7 +897,7 @@ void read_rcv_values(void){
 
 }
 
-<<<<<<< HEAD
+
 void read_rcv_flags(void){
 	
 	printf("\n** PRINTING RCV FLAGS **\n");
@@ -914,7 +914,9 @@ void read_rcv_flags(void){
 	printf("SRC2: %d\n", rcv_bitmap.continuation1);
 	printf("PROTO: %d\n", rcv_bitmap.protocol);
 	printf("CRC: %d\n\n", rcv_bitmap.checksum);
-=======
+
+}
+
 char* mod_strncat(char *dest, const char *src, size_t n, int *index)
 {
     //size_t dest_len = strlen(dest);
@@ -927,5 +929,4 @@ char* mod_strncat(char *dest, const char *src, size_t n, int *index)
 
    *index += n;
    return dest;
->>>>>>> c244e2caae41fb7f299fcd1d03fd27c98ccde858
 }
