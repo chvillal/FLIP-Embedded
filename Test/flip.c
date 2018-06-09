@@ -736,11 +736,11 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 			rcv_header_values.destination_addr = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1] ;
 			j +=2;
 		} 
-		if ( dst_size == 4) {
+		else if ( dst_size == 4) {
 			rcv_header_values.destination_addr = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] << 16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
 			j +=4;
 		}
-		if ( dst_size == 16) {
+		else if ( dst_size == 16) {
 		//	rcv_header_values.destination_addr = buff[j] << 24 | buff[j+1] << 16 | buff[j+2] << 8 | buff[j+3]
 		//										 buff[j+4] << 24 | buff[j+5] << 16 | buff[j+6] << 8 | buff[j+7]
 		//										 buff[j+8] << 24 | buff[j+9] << 16 | buff[j+10] << 8 | buff[j+11]
@@ -773,11 +773,11 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 			rcv_header_values.source_addr = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1] ;
 			j +=2;
 		}
-		if ( src_size == 4) {
+		else if ( src_size == 4) {
 			rcv_header_values.source_addr = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] << 16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
 			j +=4;
 		}
-		if ( src_size == 16) {
+		else if ( src_size == 16) {
 			//	rcv_header_values.source_addr = buff[j] << 24 | buff[j+1] << 16 | buff[j+2] << 8 | buff[j+3]
 			//										 buff[j+4] << 24 | buff[j+5] << 16 | buff[j+6] << 8 | buff[j+7]
 			//										 buff[j+8] << 24 | buff[j+9] << 16 | buff[j+10] << 8 | buff[j+11]
@@ -897,6 +897,24 @@ void read_rcv_values(void){
 
 }
 
+<<<<<<< HEAD
+void read_rcv_flags(void){
+	
+	printf("\n** PRINTING RCV FLAGS **\n");
+	printf("CONT1: %d\n", rcv_bitmap.continuation1);
+	printf("ESP: %d\n", rcv_bitmap.continuation1);
+	printf("VER: %d\n", rcv_bitmap.continuation1);
+	printf("DEST1: %d\n", rcv_bitmap.continuation1);
+	printf("DEST2: %d\n", rcv_bitmap.continuation1);
+	printf("LEN: %d\n", rcv_bitmap.continuation1);
+	printf("TTL: %d\n", rcv_bitmap.continuation1);
+	printf("FLOW: %d\n", rcv_bitmap.continuation1);
+	printf("CONT2: %d\n", rcv_bitmap.continuation1);
+	printf("SRC1: %d\n", rcv_bitmap.continuation1);
+	printf("SRC2: %d\n", rcv_bitmap.continuation1);
+	printf("PROTO: %d\n", rcv_bitmap.protocol);
+	printf("CRC: %d\n\n", rcv_bitmap.checksum);
+=======
 char* mod_strncat(char *dest, const char *src, size_t n, int *index)
 {
     //size_t dest_len = strlen(dest);
@@ -909,4 +927,5 @@ char* mod_strncat(char *dest, const char *src, size_t n, int *index)
 
    *index += n;
    return dest;
+>>>>>>> c244e2caae41fb7f299fcd1d03fd27c98ccde858
 }

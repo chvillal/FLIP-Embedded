@@ -100,6 +100,7 @@ typedef struct
 
 void reset_bitmap(meta_header *bitmap);
 void reset_header(flip_header *header_values);
+void read_rcv_flags(void);
 
 
 #endif // FLIP_H_
