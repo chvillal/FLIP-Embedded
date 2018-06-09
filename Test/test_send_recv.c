@@ -9,8 +9,8 @@ int main(int argc, char *argv[])
 {	
 	metaHdr.continuation1 = false;
 	metaHdr.version = true;
-	metaHdr.destination1 = false;
-	metaHdr.flow = false;
+	metaHdr.destination1 = true;
+	metaHdr.flow = true;
 	metaHdr.ttl = true;
 	metaHdr.length = true;
 	metaHdr.protocol = true;
@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
 	flipHdr.ttl = 6;
 	flipHdr.length = 12;
 	flipHdr.protocol = 3;
-	//flipHdr.destination_addr = 1234;
-	//flipHdr.flow = 38;
+	flipHdr.destination_addr = 2949567296;
+	flipHdr.flow = 38;
 
 	char *payload = "HELLO";
 	
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	char read_string[20];
 	
 	printf("constructed packet is: %s\n", packet);
-	for (int i = 0; i < 11; i ++) {
+	for (int i = 0; i < 20; i ++) {
 		printf(" %02x", packet[i]);
 	}
 	printf("\n");
