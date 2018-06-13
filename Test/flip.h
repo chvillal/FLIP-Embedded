@@ -17,6 +17,7 @@
 #define FLIPO_SOURCE 8
 #define FLIPO_PROTOCOL 9 
 #define FLIPO_CHECKSUM 10
+#define FLIPO_RESET 11
 
 
 /* FUNCTION DECLARATIONS */
@@ -44,6 +45,7 @@ void read_rcv_values(void);
 int get_bitmap_str(char *packet, char *str, int str_len);
 
 char* mod_strncat(char *dest, const char *src, size_t n, int *index);
+void reset_values (uint32_t optval);
 
 int get_packet_length();
 
