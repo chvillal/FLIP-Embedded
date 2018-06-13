@@ -57,5 +57,6 @@ int main(int argc, char *argv[])
 	read_rcv_flags();
 	
 	
-
+	int packet_len = get_packet_length();
+	printf("Length of the packet is: %d\n", packet_len);
 }

@@ -426,9 +426,15 @@ char* FLIP_construct_packet (char *bitmap, char *header, char *payload)
 	printf("Packet is: %s\n", packet_string);
 	printf("Index is: %d\n", index);
 	
+	flipHdr.packet_len = index;
+	
 	return packet_string;
 }
 
+int get_packet_length()
+{
+	return flipHdr.packet_len;
+}
 
 int setsockopt(int optname, uint32_t optval, int optlen)
 {

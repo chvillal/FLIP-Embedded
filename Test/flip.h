@@ -45,6 +45,8 @@ int get_bitmap_str(char *packet, char *str, int str_len);
 
 char* mod_strncat(char *dest, const char *src, size_t n, int *index);
 
+int get_packet_length();
+
 /*
  * FLIP Meta-header
  */
@@ -82,6 +84,7 @@ typedef struct
 	uint8_t protocol; 			/* Higher layer protocols. */
 	uint16_t checksum; 			/* FLIP header checksum. */
 	
+	int packet_len;
 	int header_len;
 	
 } flip_header;
