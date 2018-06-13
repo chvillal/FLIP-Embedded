@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	
 
 	
-	flip_parse_packet(packet, 10, payload);
+	flip_read_packet(packet, 10, payload);
 
 	
 	read_rcv_values();
