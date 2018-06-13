@@ -413,7 +413,7 @@ char* FLIP_construct_header (void)
 
 char* FLIP_construct_packet (char *bitmap, char *header, char *payload)
 {
-	char *packet_string = (char *) malloc(sizeof(char) * 500);
+	char *packet_string = (char *) malloc(sizeof(char) * 32);
 	
 	memset(packet_string, '\0', sizeof(packet_string));
 	
@@ -478,7 +478,10 @@ int setsockopt(int optname, uint32_t optval, int optlen)
 			ret = add_checksum (optval);
 			break; 
 			
-	  
+		case FLIPO_RESET:
+			reset_values(optval);
+			break;
+			
 		default:
 			printf("Not a valid option\n");
 			return -1;
@@ -486,20 +489,53 @@ int setsockopt(int optname, uint32_t optval, int optlen)
 	return ret;
 }
 
+void reset_values (uint32_t optval)
+{
+	metaHdr.continuation1 = 0;
+	metaHdr.continuation2 = 0;
+	metaHdr.version = 0;
+	metaHdr.destination1 = 0;
+	metaHdr.destination2 = 0;
+	metaHdr.length = 0;
+	metaHdr.ttl = 0;
+	metaHdr.flow = 0;
+	metaHdr.source1 = 0;
+	metaHdr.source2 = 0;
+	metaHdr.protocol = 0;
+	metaHdr.checksum = 0;
+	
+	flipHdr.version = (uint8_t) optval;
+	flipHdr.destination_addr = optval;
+	flipHdr.length = (uint16_t) optval;
+	flipHdr.ttl = (uint8_t) optval;
+	flipHdr.flow = (uint32_t) optval;
+	flipHdr.source_addr = optval;
+	flipHdr.protocol = (uint8_t) optval;
+	flipHdr.checksum = (uint16_t) optval;
+}
 
+
+int add_version (uint32_t optval)
+{
+	metaHdr.version = 1;
+	flipHdr.version = (uint8_t) optval;
+	printf("Version is %u\n", flipHdr.version);
+	
+	return 0;
+}
 
 int add_destination(uint32_t optval, int optlen)
 {
-	if (optlen == 16){
-		printf("Destination field should be two bytes, it is %d bits", optlen);
+	if (optlen == 2){
+		printf("Destination field should be two bytes, it is %d bytes", optlen);
 		metaHdr.destination1 = 0;
 		metaHdr.destination2 = 1;
-	}else if (optlen == 32){
-		printf("Destination field should be four bytes, it is %d bits", optlen);
+	}else if (optlen == 4){
+		printf("Destination field should be four bytes, it is %d bytes", optlen);
 		metaHdr.destination1 = 1;
 		metaHdr.destination2 = 0;
-	}else if (optlen == 64){
-		printf("Destination field should be sixteen bytes, it is %d bits", optlen);
+	}else if (optlen == 16){
+		printf("Destination field should be sixteen bytes, it is %d bytes", optlen);
 		metaHdr.destination1 = 1;
 		metaHdr.destination2 = 1;
 	}else{
@@ -515,6 +551,7 @@ int add_destination(uint32_t optval, int optlen)
 
 int add_length (uint32_t optval)
 {
+	metaHdr.length = 1;
 	flipHdr.length = (uint16_t) optval;
 	printf("length is %u\n", flipHdr.length);
 	
@@ -523,6 +560,7 @@ int add_length (uint32_t optval)
 
 int add_ttl (uint32_t optval)
 {
+	metaHdr.ttl = 1;
 	flipHdr.ttl =  (uint8_t) optval;
 	printf("Time to live is %u\n", flipHdr.ttl);
 	
@@ -531,6 +569,8 @@ int add_ttl (uint32_t optval)
 
 int add_protocol (uint32_t optval)
 {
+	metaHdr.continuation1 = 1;
+	metaHdr.protocol = 1;
 	flipHdr.protocol = (uint8_t) optval;
 	printf("Protocol is %u\n", flipHdr.protocol);
 	
@@ -539,22 +579,18 @@ int add_protocol (uint32_t optval)
 
 int add_checksum (uint32_t optval)
 {
+	metaHdr.continuation1 = 1;
+	metaHdr.checksum = 1;
 	flipHdr.checksum = (uint16_t) optval;
 	printf("Checksum is %u\n", flipHdr.checksum);
 	
 	return 0;
 }
 
-int add_version (uint32_t optval)
-{
-	flipHdr.version = (uint8_t) optval;
-	printf("Version is %u\n", flipHdr.version);
-	
-	return 0;
-}
 
 int add_flow (uint32_t optval)
 {
+	metaHdr.flow = 1;
 	flipHdr.flow = optval;
 	printf("Flow is %u\n", flipHdr.flow);
 	
@@ -563,15 +599,15 @@ int add_flow (uint32_t optval)
 
 int add_source(uint32_t optval, int optlen)
 {
-	if (optlen == 16){
+	if (optlen == 2){
 		printf("Source field should be two bytes, it is %d bits", optlen);
 		metaHdr.source1 = 0;
 		metaHdr.source2 = 1;
-	}else if (optlen == 32){
+	}else if (optlen == 4){
 		printf("Source field should be four bytes, it is %d bits", optlen);
 		metaHdr.source1 = 1;
 		metaHdr.source2 = 0;
-	}else if (optlen == 64){
+	}else if (optlen == 16){
 		printf("Source field should be sixteen bytes, it is %d bits", optlen);
 		metaHdr.source1 = 1;
 		metaHdr.source2 = 1;
@@ -580,6 +616,7 @@ int add_source(uint32_t optval, int optlen)
 		return -1;
 	}
 		
+	metaHdr.continuation1 = 1;
 	flipHdr.source_addr = optval;
 	printf("Source address is: %u\n", flipHdr.source_addr);
 	

@@ -7,7 +7,19 @@ flip_header flipHdr;
 
 int main(int argc, char *argv[])
 {	
-	metaHdr.continuation1 = true;
+	int ret;
+	
+	ret = setsockopt(FLIPO_VERSION, 3, 0);
+	ret = setsockopt(FLIPO_LENGTH, 55, 0);
+	ret = setsockopt(FLIPO_DESTINATION, 32, 2);
+	ret = setsockopt(FLIPO_TTL, 2, 0);
+	ret = setsockopt(FLIPO_FLOW, 1, 0);
+	ret = setsockopt(FLIPO_SOURCE, 321, 4);
+	ret = setsockopt(FLIPO_CHECKSUM, 1, 0);
+	ret = setsockopt(FLIPO_PROTOCOL, 4, 0);
+
+
+/* 	metaHdr.continuation1 = true;
 	metaHdr.version = true;
 	metaHdr.destination1 = true;
 	metaHdr.flow = true;
@@ -22,7 +34,7 @@ int main(int argc, char *argv[])
 	flipHdr.protocol = 3;
 	flipHdr.destination_addr = 29;
 	flipHdr.flow = 38;
-	flipHdr.source_addr = 43;
+	flipHdr.source_addr = 43; */
 
 	char *payload = "HELLO";
 	
