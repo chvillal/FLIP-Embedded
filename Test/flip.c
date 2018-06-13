@@ -914,16 +914,16 @@ void read_rcv_flags(void){
 	
 	printf("\n** PRINTING RCV FLAGS **\n");
 	printf("CONT1: %d\n", rcv_bitmap.continuation1);
-	printf("ESP: %d\n", rcv_bitmap.continuation1);
-	printf("VER: %d\n", rcv_bitmap.continuation1);
-	printf("DEST1: %d\n", rcv_bitmap.continuation1);
-	printf("DEST2: %d\n", rcv_bitmap.continuation1);
-	printf("LEN: %d\n", rcv_bitmap.continuation1);
-	printf("TTL: %d\n", rcv_bitmap.continuation1);
-	printf("FLOW: %d\n", rcv_bitmap.continuation1);
-	printf("CONT2: %d\n", rcv_bitmap.continuation1);
-	printf("SRC1: %d\n", rcv_bitmap.continuation1);
-	printf("SRC2: %d\n", rcv_bitmap.continuation1);
+	printf("ESP: %d\n", rcv_bitmap.esp);
+	printf("VER: %d\n", rcv_bitmap.version);
+	printf("DEST1: %d\n", rcv_bitmap.destination1);
+	printf("DEST2: %d\n", rcv_bitmap.destination2);
+	printf("LEN: %d\n", rcv_bitmap.length);
+	printf("TTL: %d\n", rcv_bitmap.ttl);
+	printf("FLOW: %d\n", rcv_bitmap.flow);
+	printf("CONT2: %d\n", rcv_bitmap.continuation2);
+	printf("SRC1: %d\n", rcv_bitmap.source1);
+	printf("SRC2: %d\n", rcv_bitmap.source2);
 	printf("PROTO: %d\n", rcv_bitmap.protocol);
 	printf("CRC: %d\n\n", rcv_bitmap.checksum);
 
