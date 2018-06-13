@@ -34,36 +34,28 @@ char* FLIP_construct_bitmap (void)
 		
 		// The first continuationo bit is off, initialize a bitmap of one byte
 		uint8_t bitmap = 0;
-		//printf("Bitmap is: %u\n", bitmap);
 		
 		// Construct the bitmap based on the meta header fields
 		if (metaHdr.esp){
 			bitmap = bitmap | 1 << 6;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.version){
 			bitmap = bitmap | 1 << 5;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.destination1){
 			bitmap = bitmap | 1 << 4;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.destination2){
 			bitmap = bitmap | 1 << 3;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.length){
 			bitmap = bitmap | 1 << 2;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.ttl){
 			bitmap = bitmap | 1 << 1;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.flow){
 			bitmap = bitmap | 1;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		
 		printf("Bitmap is: %u\n", bitmap);
