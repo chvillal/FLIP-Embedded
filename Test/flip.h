@@ -36,7 +36,7 @@ char* FLIP_construct_bitmap (void);
 char* FLIP_construct_header (void);
 char* FLIP_construct_packet (char *bitmap, char *header, char *payload);
 
-int flip_parse_packet(char *buff, int buff_len, char *payload );
+int flip_read_packet(char *buff, int buff_len, char *payload );
 int read_bitmap(char *buff, int *i, int *dst_size, int *src_size); 
 int read_header_values(char *buff, int *i, int dst_size, int src_size);
 

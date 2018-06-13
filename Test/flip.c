@@ -615,7 +615,7 @@ uint32_t test_function(uint32_t num)
  * or -1 if error.
  *
  */
-int flip_parse_packet(char *buff, int buff_len, char *payload ){
+int flip_read_packet(char *buff, int buff_len, char *payload ){
 	int i = 0;
 	int dst_size = 0;
 	int src_size = 0;	
@@ -657,16 +657,21 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
 		rcv_bitmap.version = true;
 	}
 	
-	if (bitmap & BITMASK_DST_SIZE_16){
-		rcv_bitmap.destination1 = true;
-		rcv_bitmap.destination2 = true;	
+	if (bitmap & BITMASK_DST_SIZE_16){		
 			
-		if ((bitmap & BITMASK_DST_SIZE_2) == BITMASK_DST_SIZE_2)
+		if ((bitmap & BITMASK_DST_SIZE_2) == BITMASK_DST_SIZE_2){
 			*dst_size = 2;
-		if ((bitmap & BITMASK_DST_SIZE_4) == BITMASK_DST_SIZE_4)
+			rcv_bitmap.destination2 = true;	
+		}
+		if ((bitmap & BITMASK_DST_SIZE_4) == BITMASK_DST_SIZE_4){
 			*dst_size = 4;
-		if ((bitmap & BITMASK_DST_SIZE_16) == BITMASK_DST_SIZE_16)
+			rcv_bitmap.destination1 = true;
+		}
+		if ((bitmap & BITMASK_DST_SIZE_16) == BITMASK_DST_SIZE_16){
 			*dst_size = 16;
+			rcv_bitmap.destination1 = true;
+			rcv_bitmap.destination2 = true;
+		}
 	}
 	
 	if (bitmap & BITMASK_LEN){
@@ -682,19 +687,25 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
 	}
 	
 	if (bitmap & BITMASK_CONT){
+		rcv_bitmap.continuation1 = true;
 		*i += *i + 1;
 		bitmap = (uint8_t) buff[*i];
 		
 		if (bitmap & BITMASK_SRC_SIZE_16){
-			rcv_bitmap.source1 = true;
-			rcv_bitmap.source2 = true;
-			
-			if ((bitmap & BITMASK_SRC_SIZE_2) == BITMASK_SRC_SIZE_2)
+
+			if ((bitmap & BITMASK_SRC_SIZE_2) == BITMASK_SRC_SIZE_2){
 				*src_size = 2;
-			if ((bitmap & BITMASK_SRC_SIZE_4) == BITMASK_SRC_SIZE_4)
+				rcv_bitmap.source2 = true;
+			}
+			if ((bitmap & BITMASK_SRC_SIZE_4) == BITMASK_SRC_SIZE_4){
 				*src_size = 4;
-			if ((bitmap & BITMASK_SRC_SIZE_16) == BITMASK_SRC_SIZE_16)
+				rcv_bitmap.source1 = true;
+			}
+			if ((bitmap & BITMASK_SRC_SIZE_16) == BITMASK_SRC_SIZE_16){
 				*src_size = 16;
+				rcv_bitmap.source1 = true;
+				rcv_bitmap.source2 = true;
+			}
 		}
 		
 		if (bitmap & BITMASK_PROTOCOL){
@@ -862,7 +873,7 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 		}
 		
 		//if no more continuation bytes, done, exit
-		if (( bitmap & (1<<8)) == 0)
+		if (( bitmap & (1<<7)) == 0)
 			break;
 	}
 	
