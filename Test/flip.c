@@ -413,7 +413,7 @@ char* FLIP_construct_header (void)
 
 char* FLIP_construct_packet (char *bitmap, char *header, char *payload)
 {
-	char *packet_string = (char *) malloc(sizeof(char) * 500);
+	char *packet_string = (char *) malloc(sizeof(char) * 32);
 	
 	memset(packet_string, '\0', sizeof(packet_string));
 	

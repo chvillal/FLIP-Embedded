@@ -34,36 +34,28 @@ char* FLIP_construct_bitmap (void)
 		
 		// The first continuationo bit is off, initialize a bitmap of one byte
 		uint8_t bitmap = 0;
-		//printf("Bitmap is: %u\n", bitmap);
 		
 		// Construct the bitmap based on the meta header fields
 		if (metaHdr.esp){
 			bitmap = bitmap | 1 << 6;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.version){
 			bitmap = bitmap | 1 << 5;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.destination1){
 			bitmap = bitmap | 1 << 4;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.destination2){
 			bitmap = bitmap | 1 << 3;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.length){
 			bitmap = bitmap | 1 << 2;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.ttl){
 			bitmap = bitmap | 1 << 1;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		if (metaHdr.flow){
 			bitmap = bitmap | 1;
-			//printf("Bitmap is: %u\n", bitmap);
 		}
 		
 		printf("Bitmap is: %u\n", bitmap);
@@ -161,7 +153,7 @@ char* FLIP_construct_bitmap (void)
 
 char* FLIP_construct_header (void)
 {
-	char *header_string = (char *) malloc(sizeof(char) * 30);
+	char *header_string = (char *) malloc(sizeof(char) * 20);
 	memset(header_string, '\0', sizeof(header_string));
 	
 	int index = 0;
@@ -434,9 +426,15 @@ char* FLIP_construct_packet (char *bitmap, char *header, char *payload)
 	printf("Packet is: %s\n", packet_string);
 	printf("Index is: %d\n", index);
 	
+	flipHdr.packet_len = index;
+	
 	return packet_string;
 }
 
+int get_packet_length()
+{
+	return flipHdr.packet_len;
+}
 
 int setsockopt(int optname, uint32_t optval, int optlen)
 {
@@ -480,7 +478,10 @@ int setsockopt(int optname, uint32_t optval, int optlen)
 			ret = add_checksum (optval);
 			break; 
 			
-	  
+		case FLIPO_RESET:
+			reset_values(optval);
+			break;
+			
 		default:
 			printf("Not a valid option\n");
 			return -1;
@@ -488,20 +489,53 @@ int setsockopt(int optname, uint32_t optval, int optlen)
 	return ret;
 }
 
+void reset_values (uint32_t optval)
+{
+	metaHdr.continuation1 = 0;
+	metaHdr.continuation2 = 0;
+	metaHdr.version = 0;
+	metaHdr.destination1 = 0;
+	metaHdr.destination2 = 0;
+	metaHdr.length = 0;
+	metaHdr.ttl = 0;
+	metaHdr.flow = 0;
+	metaHdr.source1 = 0;
+	metaHdr.source2 = 0;
+	metaHdr.protocol = 0;
+	metaHdr.checksum = 0;
+	
+	flipHdr.version = (uint8_t) optval;
+	flipHdr.destination_addr = optval;
+	flipHdr.length = (uint16_t) optval;
+	flipHdr.ttl = (uint8_t) optval;
+	flipHdr.flow = (uint32_t) optval;
+	flipHdr.source_addr = optval;
+	flipHdr.protocol = (uint8_t) optval;
+	flipHdr.checksum = (uint16_t) optval;
+}
 
+
+int add_version (uint32_t optval)
+{
+	metaHdr.version = 1;
+	flipHdr.version = (uint8_t) optval;
+	printf("Version is %u\n", flipHdr.version);
+	
+	return 0;
+}
 
 int add_destination(uint32_t optval, int optlen)
 {
-	if (optlen == 16){
-		printf("Destination field should be two bytes, it is %d bits", optlen);
+	if (optlen == 2){
+		printf("Destination field should be two bytes, it is %d bytes", optlen);
 		metaHdr.destination1 = 0;
 		metaHdr.destination2 = 1;
-	}else if (optlen == 32){
-		printf("Destination field should be four bytes, it is %d bits", optlen);
+	}else if (optlen == 4){
+		printf("Destination field should be four bytes, it is %d bytes", optlen);
 		metaHdr.destination1 = 1;
 		metaHdr.destination2 = 0;
-	}else if (optlen == 64){
-		printf("Destination field should be sixteen bytes, it is %d bits", optlen);
+	}else if (optlen == 16){
+		printf("Destination field should be sixteen bytes, it is %d bytes", optlen);
 		metaHdr.destination1 = 1;
 		metaHdr.destination2 = 1;
 	}else{
@@ -517,6 +551,7 @@ int add_destination(uint32_t optval, int optlen)
 
 int add_length (uint32_t optval)
 {
+	metaHdr.length = 1;
 	flipHdr.length = (uint16_t) optval;
 	printf("length is %u\n", flipHdr.length);
 	
@@ -525,6 +560,7 @@ int add_length (uint32_t optval)
 
 int add_ttl (uint32_t optval)
 {
+	metaHdr.ttl = 1;
 	flipHdr.ttl =  (uint8_t) optval;
 	printf("Time to live is %u\n", flipHdr.ttl);
 	
@@ -533,6 +569,8 @@ int add_ttl (uint32_t optval)
 
 int add_protocol (uint32_t optval)
 {
+	metaHdr.continuation1 = 1;
+	metaHdr.protocol = 1;
 	flipHdr.protocol = (uint8_t) optval;
 	printf("Protocol is %u\n", flipHdr.protocol);
 	
@@ -541,22 +579,18 @@ int add_protocol (uint32_t optval)
 
 int add_checksum (uint32_t optval)
 {
+	metaHdr.continuation1 = 1;
+	metaHdr.checksum = 1;
 	flipHdr.checksum = (uint16_t) optval;
 	printf("Checksum is %u\n", flipHdr.checksum);
 	
 	return 0;
 }
 
-int add_version (uint32_t optval)
-{
-	flipHdr.version = (uint8_t) optval;
-	printf("Version is %u\n", flipHdr.version);
-	
-	return 0;
-}
 
 int add_flow (uint32_t optval)
 {
+	metaHdr.flow = 1;
 	flipHdr.flow = optval;
 	printf("Flow is %u\n", flipHdr.flow);
 	
@@ -565,15 +599,15 @@ int add_flow (uint32_t optval)
 
 int add_source(uint32_t optval, int optlen)
 {
-	if (optlen == 16){
+	if (optlen == 2){
 		printf("Source field should be two bytes, it is %d bits", optlen);
 		metaHdr.source1 = 0;
 		metaHdr.source2 = 1;
-	}else if (optlen == 32){
+	}else if (optlen == 4){
 		printf("Source field should be four bytes, it is %d bits", optlen);
 		metaHdr.source1 = 1;
 		metaHdr.source2 = 0;
-	}else if (optlen == 64){
+	}else if (optlen == 16){
 		printf("Source field should be sixteen bytes, it is %d bits", optlen);
 		metaHdr.source1 = 1;
 		metaHdr.source2 = 1;
@@ -582,6 +616,7 @@ int add_source(uint32_t optval, int optlen)
 		return -1;
 	}
 		
+	metaHdr.continuation1 = 1;
 	flipHdr.source_addr = optval;
 	printf("Source address is: %u\n", flipHdr.source_addr);
 	
@@ -615,7 +650,7 @@ uint32_t test_function(uint32_t num)
  * or -1 if error.
  *
  */
-int flip_parse_packet(char *buff, int buff_len, char *payload ){
+int flip_read_packet(char *buff, int buff_len, char *payload ){
 	int i = 0;
 	int dst_size = 0;
 	int src_size = 0;	
@@ -657,16 +692,21 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
 		rcv_bitmap.version = true;
 	}
 	
-	if (bitmap & BITMASK_DST_SIZE_16){
-		rcv_bitmap.destination1 = true;
-		rcv_bitmap.destination2 = true;	
+	if (bitmap & BITMASK_DST_SIZE_16){		
 			
-		if ((bitmap & BITMASK_DST_SIZE_2) == BITMASK_DST_SIZE_2)
+		if ((bitmap & BITMASK_DST_SIZE_2) == BITMASK_DST_SIZE_2){
 			*dst_size = 2;
-		if ((bitmap & BITMASK_DST_SIZE_4) == BITMASK_DST_SIZE_4)
+			rcv_bitmap.destination2 = true;	
+		}
+		if ((bitmap & BITMASK_DST_SIZE_4) == BITMASK_DST_SIZE_4){
 			*dst_size = 4;
-		if ((bitmap & BITMASK_DST_SIZE_16) == BITMASK_DST_SIZE_16)
+			rcv_bitmap.destination1 = true;
+		}
+		if ((bitmap & BITMASK_DST_SIZE_16) == BITMASK_DST_SIZE_16){
 			*dst_size = 16;
+			rcv_bitmap.destination1 = true;
+			rcv_bitmap.destination2 = true;
+		}
 	}
 	
 	if (bitmap & BITMASK_LEN){
@@ -682,19 +722,25 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
 	}
 	
 	if (bitmap & BITMASK_CONT){
-		*i += *i + 1;
+		rcv_bitmap.continuation1 = true;
+		*i += 1;
 		bitmap = (uint8_t) buff[*i];
 		
 		if (bitmap & BITMASK_SRC_SIZE_16){
-			rcv_bitmap.source1 = true;
-			rcv_bitmap.source2 = true;
-			
-			if ((bitmap & BITMASK_SRC_SIZE_2) == BITMASK_SRC_SIZE_2)
+
+			if ((bitmap & BITMASK_SRC_SIZE_2) == BITMASK_SRC_SIZE_2){
 				*src_size = 2;
-			if ((bitmap & BITMASK_SRC_SIZE_4) == BITMASK_SRC_SIZE_4)
+				rcv_bitmap.source2 = true;
+			}
+			if ((bitmap & BITMASK_SRC_SIZE_4) == BITMASK_SRC_SIZE_4){
 				*src_size = 4;
-			if ((bitmap & BITMASK_SRC_SIZE_16) == BITMASK_SRC_SIZE_16)
+				rcv_bitmap.source1 = true;
+			}
+			if ((bitmap & BITMASK_SRC_SIZE_16) == BITMASK_SRC_SIZE_16){
 				*src_size = 16;
+				rcv_bitmap.source1 = true;
+				rcv_bitmap.source2 = true;
+			}
 		}
 		
 		if (bitmap & BITMASK_PROTOCOL){
@@ -707,7 +753,7 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
 	}
 	
 	// move index to point to next byte
-	*i += *i +1;
+	*i += 1;
 	
 	return 0;
 }
@@ -727,7 +773,9 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 	if ( rcv_bitmap.version){
 		//1 byte long
 		rcv_header_values.version = (uint8_t) buff[j];
+		printf("index: %d, value: %u\n", j, rcv_header_values.version);
 		j++;
+		
 	}
 	
 	if ( rcv_bitmap.destination1 || rcv_bitmap.destination2){		
@@ -736,35 +784,44 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 			rcv_header_values.destination_addr = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1] ;
 			j +=2;
 		} 
-		if ( dst_size == 4) {
+		else if ( dst_size == 4) {
 			rcv_header_values.destination_addr = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] << 16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
+			printf("index: %d, value: %u\n", j, rcv_header_values.destination_addr);
 			j +=4;
 		}
-		if ( dst_size == 16) {
+		else if ( dst_size == 16) {
 		//	rcv_header_values.destination_addr = buff[j] << 24 | buff[j+1] << 16 | buff[j+2] << 8 | buff[j+3]
 		//										 buff[j+4] << 24 | buff[j+5] << 16 | buff[j+6] << 8 | buff[j+7]
 		//										 buff[j+8] << 24 | buff[j+9] << 16 | buff[j+10] << 8 | buff[j+11]
 		//										 buff[j+12] << 24 | buff[j+13] << 16 | buff[j+14] << 8 | buff[j+15];
 			j +=16;
 		}
+		
+		
 	}
 	
 	if ( rcv_bitmap.length){
 		// 2 bytes long
 		rcv_header_values.length = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1];
+		printf("index: %d, value: %u\n", j, rcv_header_values.length);
 		j +=2;
+		
 	}
 	
 	if ( rcv_bitmap.ttl){
 		//1 byte long
 		rcv_header_values.ttl = (uint8_t)buff[j];
+		printf("index: %d, value: %u\n", j, rcv_header_values.ttl);
 		j++;
+		
 	}
 	
 	if ( rcv_bitmap.flow){ 
 		// 4 bytes long
 		rcv_header_values.flow = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] <<16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
+		printf("index: %d, value: %u\n", j, rcv_header_values.flow);
 		j +=4;
+		
 	}
 	
 	if ( rcv_bitmap.source1 || rcv_bitmap.source2){ 
@@ -773,28 +830,34 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 			rcv_header_values.source_addr = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1] ;
 			j +=2;
 		}
-		if ( src_size == 4) {
+		else if ( src_size == 4) {
 			rcv_header_values.source_addr = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] << 16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
+			printf("index: %d, value: %u\n", j, rcv_header_values.source_addr);
 			j +=4;
 		}
-		if ( src_size == 16) {
+		else if ( src_size == 16) {
 			//	rcv_header_values.source_addr = buff[j] << 24 | buff[j+1] << 16 | buff[j+2] << 8 | buff[j+3]
 			//										 buff[j+4] << 24 | buff[j+5] << 16 | buff[j+6] << 8 | buff[j+7]
 			//										 buff[j+8] << 24 | buff[j+9] << 16 | buff[j+10] << 8 | buff[j+11]
 			//										 buff[j+12] << 24 | buff[j+13] << 16 | buff[j+14] << 8 | buff[j+15];
 			j +=16;
 		}
+		
 	}
 	
 	if ( rcv_bitmap.protocol){
 		// 1 byte long
 		rcv_header_values.protocol = (uint8_t)buff[j];
+		
+		printf("index: %d, value: %u\n", j, rcv_header_values.protocol);
 		j++;
 	}
 	
 	if ( rcv_bitmap.checksum){
 		// 2 bytes long
 		rcv_header_values.checksum =  (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1];
+		
+		printf("index: %d, value: %u\n", j, rcv_header_values.checksum);
 		j +=2;
 	}
 	
