@@ -726,12 +726,14 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
  */
 int read_header_values(char *buff, int *i, int dst_size, int src_size){
 	int j = *i;
+	j--;
 	
 	if ( rcv_bitmap.version){
 		//1 byte long
 		rcv_header_values.version = (uint8_t) buff[j];
-		j++;
 		printf("index: %d, value: %u\n", j, rcv_header_values.version);
+		j++;
+		
 	}
 	
 	if ( rcv_bitmap.destination1 || rcv_bitmap.destination2){		
@@ -742,6 +744,7 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 		} 
 		else if ( dst_size == 4) {
 			rcv_header_values.destination_addr = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] << 16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
+			printf("index: %d, value: %u\n", j, rcv_header_values.destination_addr);
 			j +=4;
 		}
 		else if ( dst_size == 16) {
@@ -752,28 +755,31 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 			j +=16;
 		}
 		
-		printf("index: %d, value: %u\n", j, rcv_header_values.destination_addr);
+		
 	}
 	
 	if ( rcv_bitmap.length){
 		// 2 bytes long
 		rcv_header_values.length = (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1];
-		j +=2;
 		printf("index: %d, value: %u\n", j, rcv_header_values.length);
+		j +=2;
+		
 	}
 	
 	if ( rcv_bitmap.ttl){
 		//1 byte long
 		rcv_header_values.ttl = (uint8_t)buff[j];
-		j++;
 		printf("index: %d, value: %u\n", j, rcv_header_values.ttl);
+		j++;
+		
 	}
 	
 	if ( rcv_bitmap.flow){ 
 		// 4 bytes long
 		rcv_header_values.flow = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] <<16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
-		j +=4;
 		printf("index: %d, value: %u\n", j, rcv_header_values.flow);
+		j +=4;
+		
 	}
 	
 	if ( rcv_bitmap.source1 || rcv_bitmap.source2){ 
@@ -784,6 +790,7 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 		}
 		else if ( src_size == 4) {
 			rcv_header_values.source_addr = (uint8_t)buff[j] << 24 | (uint8_t)buff[j+1] << 16 | (uint8_t)buff[j+2] << 8 | (uint8_t)buff[j+3] ;
+			printf("index: %d, value: %u\n", j, rcv_header_values.source_addr);
 			j +=4;
 		}
 		else if ( src_size == 16) {
@@ -793,21 +800,23 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size){
 			//										 buff[j+12] << 24 | buff[j+13] << 16 | buff[j+14] << 8 | buff[j+15];
 			j +=16;
 		}
-		printf("index: %d, value: %u\n", j, rcv_header_values.source_addr);
+		
 	}
 	
 	if ( rcv_bitmap.protocol){
 		// 1 byte long
 		rcv_header_values.protocol = (uint8_t)buff[j];
-		j++;
+		
 		printf("index: %d, value: %u\n", j, rcv_header_values.protocol);
+		j++;
 	}
 	
 	if ( rcv_bitmap.checksum){
 		// 2 bytes long
 		rcv_header_values.checksum =  (uint8_t)buff[j] << 8 | (uint8_t)buff[j+1];
-		j +=2;
+		
 		printf("index: %d, value: %u\n", j, rcv_header_values.checksum);
+		j +=2;
 	}
 	
 	*i = j;
