@@ -161,7 +161,7 @@ char* FLIP_construct_bitmap (void)
 
 char* FLIP_construct_header (void)
 {
-	char *header_string = (char *) malloc(sizeof(char) * 20);
+	char *header_string = (char *) malloc(sizeof(char) * 30);
 	memset(header_string, '\0', sizeof(header_string));
 	
 	int index = 0;
@@ -862,7 +862,7 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 		}
 		
 		//if no more continuation bytes, done, exit
-		if (( bitmap & (1<<8)) == 0)
+		if (( bitmap & (1<<7)) == 0)
 			break;
 	}
 	
@@ -894,6 +894,26 @@ void read_rcv_values(void){
 	printf("DST: %u\n", rcv_header_values.destination_addr);
 	printf("PRO: %u\n", rcv_header_values.protocol);
 	printf("CRC: %u\n\n", rcv_header_values.checksum);
+
+}
+
+
+void read_rcv_flags(void){
+	
+	printf("\n** PRINTING RCV FLAGS **\n");
+	printf("CONT1: %d\n", rcv_bitmap.continuation1);
+	printf("ESP: %d\n", rcv_bitmap.esp);
+	printf("VER: %d\n", rcv_bitmap.version);
+	printf("DEST1: %d\n", rcv_bitmap.destination1);
+	printf("DEST2: %d\n", rcv_bitmap.destination2);
+	printf("LEN: %d\n", rcv_bitmap.length);
+	printf("TTL: %d\n", rcv_bitmap.ttl);
+	printf("FLOW: %d\n", rcv_bitmap.flow);
+	printf("CONT2: %d\n", rcv_bitmap.continuation2);
+	printf("SRC1: %d\n", rcv_bitmap.source1);
+	printf("SRC2: %d\n", rcv_bitmap.source2);
+	printf("PROTO: %d\n", rcv_bitmap.protocol);
+	printf("CRC: %d\n\n", rcv_bitmap.checksum);
 
 }
 
