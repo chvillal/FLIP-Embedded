@@ -7,22 +7,23 @@
 #include <string.h>
 
 /* DEFINES */
-#define FLIPO_CONTINUATION 1
-#define FLIPO_ESP 2
-#define FLIPO_VERSION 3
-#define FLIPO_DESTINATION 4
-#define FLIPO_LENGTH 5
-#define FLIPO_TTL 6
-#define FLIPO_FLOW 7
-#define FLIPO_SOURCE 8
-#define FLIPO_PROTOCOL 9 
-#define FLIPO_CHECKSUM 10
+#define FLIPO_CONTINUATION	1
+#define FLIPO_ESP			2
+#define FLIPO_VERSION		3
+#define FLIPO_DESTINATION	4
+#define FLIPO_LENGTH		5
+#define FLIPO_TTL			6
+#define FLIPO_FLOW			7
+#define FLIPO_SOURCE		8
+#define FLIPO_PROTOCOL		9 
+#define FLIPO_CHECKSUM		10
 
 
 /* FUNCTION DECLARATIONS */
 uint32_t test_function(uint32_t num);
 
 int setsockopt (int optname, uint32_t optval, int optlen);
+int getsockopt(int optname, uint32_t *optval);
 int add_version (uint32_t optva);
 int add_destination (uint32_t optval, int optlen);
 int add_length (uint32_t optva);

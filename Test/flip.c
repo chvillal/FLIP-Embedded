@@ -956,3 +956,61 @@ char* mod_strncat(char *dest, const char *src, size_t n, int *index)
    *index += n;
    return dest;
 }
+
+/* get the value of a socket option or field from
+ * a "socket"structure.
+ *
+ * currently the function is hard coded to only retrieve
+ * values from the receiving end of a connection(socket).
+ * 
+ * saves corresponding value in OPTVAL. 
+ * returns -1 if error, 0 otherwise.
+ *
+ * NOTE: work in progress!
+ */
+int getsockopt(int optname, uint32_t *optval)
+{
+	int ret = 0;
+	
+	switch (optname) {
+		case FLIPO_ESP:
+		break;
+		
+		case FLIPO_VERSION:
+		*optval = rcv_header_values.version;
+		break;
+		
+		case FLIPO_DESTINATION:
+		*optval = rcv_header_values.destination_addr;
+		break;
+		
+		case FLIPO_LENGTH:
+		*optval = rcv_header_values.length;
+		break;
+		
+		case FLIPO_TTL:
+		*optval = rcv_header_values.ttl;
+		break;
+		
+		case FLIPO_FLOW:
+		*optval = rcv_header_values.flow;
+		break;
+		
+		case FLIPO_SOURCE:
+		*optval = rcv_header_values.source_addr;
+		break;
+		
+		case FLIPO_PROTOCOL:
+		*optval = rcv_header_values.protocol;
+		break;
+		
+		case FLIPO_CHECKSUM:
+		*optval = rcv_header_values.checksum;
+		break;
+		
+		default:
+		return -1;
+	}
+	
+	return ret;
+}
