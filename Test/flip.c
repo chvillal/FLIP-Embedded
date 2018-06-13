@@ -680,7 +680,7 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
 	
 	if (bitmap & BITMASK_CONT){
 		rcv_bitmap.continuation1 = true;
-		*i += *i + 1;
+		*i += 1;
 		bitmap = (uint8_t) buff[*i];
 		
 		if (bitmap & BITMASK_SRC_SIZE_16){
@@ -710,7 +710,7 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
 	}
 	
 	// move index to point to next byte
-	*i += *i +1;
+	*i += 1;
 	
 	return 0;
 }
@@ -726,7 +726,6 @@ int read_bitmap(char *buff, int *i, int *dst_size, int *src_size) {
  */
 int read_header_values(char *buff, int *i, int dst_size, int src_size){
 	int j = *i;
-	j--;
 	
 	if ( rcv_bitmap.version){
 		//1 byte long
