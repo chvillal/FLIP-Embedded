@@ -949,7 +949,7 @@ int get_headervals_str(char *str, int str_len){
 	
 	if (rcv_header_values.destination_addr > 0 ){
 		memset(vals, '\0', 64);
-		sprintf(vals, "DEST: %u\n", rcv_header_values.destination_addr);
+		sprintf(vals, "DST: %u\n", rcv_header_values.destination_addr);
 		strcat(str, vals);
 	}
 	
@@ -967,7 +967,7 @@ int get_headervals_str(char *str, int str_len){
 	
 	if (rcv_header_values.flow > 0 ){
 		memset(vals, '\0', 64);
-		sprintf(vals, "FLOW: %u\n", rcv_header_values.flow);
+		sprintf(vals, "FLW: %u\n", rcv_header_values.flow);
 		strcat(str, vals);
 	}
 	
@@ -979,7 +979,7 @@ int get_headervals_str(char *str, int str_len){
 	
 	if (rcv_header_values.protocol > 0 ){
 		memset(vals, '\0', 64);
-		sprintf(vals, "PROT: %u\n", rcv_header_values.protocol);
+		sprintf(vals, "PRO: %u\n", rcv_header_values.protocol);
 		strcat(str, vals);
 	}
 	

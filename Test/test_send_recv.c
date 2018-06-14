@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	int packet_len = get_packet_length();
 	printf("Length of the packet is: %d\n", packet_len);
 	
-	//char printH[256];
-	//get_headervals_str(printH, 256);
-	//printf("PRINTING HEADER VALS FROM STRUCT\n%s", printH);
+	char printH[256];
+	get_headervals_str(printH, 256);
+	printf("PRINTING HEADER VALS FROM STRUCT\n%s", printH);
 }
