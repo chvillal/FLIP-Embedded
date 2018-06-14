@@ -934,19 +934,63 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 	return 0;
 }
 
-//int get_headervals_str(char *str, int str_len){
-	//char vals[64];
-	//
-	//// 109 in max val characters + 5*8 definitions + 1 null
-	//if (str_len < 200 )
-	//return -1;
-	//
-	//if (rcv_header_values.version > 0 ){
-		//sprintf(vals, "VER: %u ", rcv_header_values.version)
-		//strcat(str, vals);
-	//}
-	//
-//}
+int get_headervals_str(char *str, int str_len){
+	char vals[64];
+	
+	// 109 in max val characters + 5*8 definitions + 1 null
+	if (str_len < 200 )
+	return -1;
+	
+	if (rcv_header_values.version > 0 ){
+		memset(vals, '\0', 64);
+		sprintf(vals, "VER: %u\n", rcv_header_values.version);
+		strcat(str, vals);
+	}
+	
+	if (rcv_header_values.destination_addr > 0 ){
+		memset(vals, '\0', 64);
+		sprintf(vals, "DEST: %u\n", rcv_header_values.destination_addr);
+		strcat(str, vals);
+	}
+	
+	if (rcv_header_values.length > 0 ){
+		memset(vals, '\0', 64);
+		sprintf(vals, "LEN: %u\n", rcv_header_values.length);
+		strcat(str, vals);
+	}
+	
+	if (rcv_header_values.ttl > 0 ){
+		memset(vals, '\0', 64);
+		sprintf(vals, "TTL: %u\n", rcv_header_values.ttl);
+		strcat(str, vals);
+	}
+	
+	if (rcv_header_values.flow > 0 ){
+		memset(vals, '\0', 64);
+		sprintf(vals, "FLOW: %u\n", rcv_header_values.flow);
+		strcat(str, vals);
+	}
+	
+	if (rcv_header_values.source_addr > 0 ){
+		memset(vals, '\0', 64);
+		sprintf(vals, "SRC: %u\n", rcv_header_values.source_addr);
+		strcat(str, vals);
+	}	
+	
+	if (rcv_header_values.protocol > 0 ){
+		memset(vals, '\0', 64);
+		sprintf(vals, "PROT: %u\n", rcv_header_values.protocol);
+		strcat(str, vals);
+	}
+	
+	if (rcv_header_values.checksum > 0 ){
+		memset(vals, '\0', 64);
+		sprintf(vals, "CRC: %u\n", rcv_header_values.checksum);
+		strcat(str, vals);
+	}
+	
+	return 0;
+}
 
 void read_rcv_values(void){
 		

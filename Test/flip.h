@@ -45,6 +45,7 @@ int read_header_values(char *buff, int *i, int dst_size, int src_size);
 
 void read_rcv_values(void);
 int get_bitmap_str(char *packet, char *str, int str_len);
+int get_headervals_str(char *str, int str_len);
 
 char* mod_strncat(char *dest, const char *src, size_t n, int *index);
 void reset_values (uint32_t optval);
