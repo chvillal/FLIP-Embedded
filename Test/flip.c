@@ -650,7 +650,7 @@ uint32_t test_function(uint32_t num)
  * or -1 if error.
  *
  */
-int flip_read_packet(char *buff, int buff_len, char *payload ){
+int flip_read_packet(char *buff, int buff_len, int *index){
 	int i = 0;
 	int dst_size = 0;
 	int src_size = 0;	
@@ -667,7 +667,9 @@ int flip_read_packet(char *buff, int buff_len, char *payload ){
 	read_header_values(buff, &i, dst_size, src_size);
 	
 	//store starting address of they payload
-	payload = buff + i;
+	//payload = buff + i;
+	
+	*index = i;
 	
 	return 0; // no errors.
 }

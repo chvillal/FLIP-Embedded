@@ -54,8 +54,9 @@ int main(int argc, char *argv[])
 	printf("\n");
 	
 
-	
-	flip_read_packet(packet, 10, payload);
+	int var;
+	flip_read_packet(packet, 10, &var);
+	printf("\n\nFLIP_read_packet payload: %s\n\n", packet+var);
 
 	
 	read_rcv_values();
