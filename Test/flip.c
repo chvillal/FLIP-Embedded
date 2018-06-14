@@ -937,6 +937,8 @@ int get_bitmap_str(char *packet, char *str, int str_len){
 int get_headervals_str(char *str, int str_len){
 	char vals[64];
 	
+	memset( str, '\0', str_len);
+	
 	// 109 in max val characters + 5*8 definitions + 1 null
 	if (str_len < 200 )
 	return -1;
