@@ -1,6 +1,6 @@
 # Embedded FLIP 
 
-A Replication of the Flexible Interconnection Protocol version 0 in C++ as presented in the following paper:
+A Replication of the *Flexible Interconnection Protocol* version 0 in C++ as presented in the following paper:
 
 > I. Solis and Katia Obraczka, [“FLIP: A Flexible Interconnection Protocol for Heterogeneous Internetworking”](https://inrg.soe.ucsc.edu/wp-content/uploads/2015/09/flip-monet.pdf), ACM/Kluwer Mobile Networking and Applications (MONET) Special on Integration of Heterogeneous Wireless Technologies.
 
