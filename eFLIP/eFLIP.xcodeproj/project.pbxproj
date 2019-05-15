@@ -27,7 +27,7 @@
 		4C7C9058227FF9CB0097E140 /* eFLIP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = eFLIP; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C7C905B227FF9CB0097E140 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		4C7C9062227FFACC0097E140 /* eflip.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = eflip.cpp; sourceTree = SOURCE_ROOT; };
-		4C7C9063227FFACC0097E140 /* eflip.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = eflip.hpp; sourceTree = SOURCE_ROOT; };
+		4C7C90652280D1ED0097E140 /* eflip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = eflip.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,8 +61,8 @@
 			isa = PBXGroup;
 			children = (
 				4C7C905B227FF9CB0097E140 /* main.cpp */,
+				4C7C90652280D1ED0097E140 /* eflip.h */,
 				4C7C9062227FFACC0097E140 /* eflip.cpp */,
-				4C7C9063227FFACC0097E140 /* eflip.hpp */,
 			);
 			path = eFLIP;
 			sourceTree = "<group>";
