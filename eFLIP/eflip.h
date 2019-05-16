@@ -11,28 +11,31 @@
 
 /* LIBRARIES */
 #include <stdint.h>
-//#include <string.h>
 
 /* DEFINES */
-#define FLIP_ESP            1
-#define FLIP_VERSION        2
-#define FLIP_DESTINATION    3
-#define FLIP_TYPE           4
-#define FLIP_TTL            5
-#define FLIP_FLOW           6
-#define FLIP_SOURCE         7
-#define FLIP_LENGTH         8
-#define FLIP_CHECKSUM       9
-#define FLIP_NOFRAG         10
-#define FLIP_OPT1           11
-#define FLIP_OPT2           12
-#define FLIP_FRAGOFFSET     13
-#define FLIP_LASTFRAG       14
-#define FLIPO_OPT3          15
-#define FLIPO_OPT4          16
-#define FLIPO_OPT5          17
-#define FLIPO_OPT6          18
-#define FLIPO_OPT7          19
+#define FLIP_ESP            0x400000
+#define FLIP_VERSION        0x200000
+#define FLIP_DEST_1         0x080000    // destination address is size 1 byte (sensors)
+#define FLIP_DEST_4         0x100000    // destination address is size 4 bytess (ipv4)
+#define FLIP_DEST_16        0x180000    // destination address is size 16 bytes (ipv6)
+#define FLIP_TYPE           0x040000
+#define FLIP_TTL            0x020000
+#define FLIP_FLOW           0x010000
+#define FLIP_SOURCE_1       0x002000    // source address is size 1 byte (sensors)
+#define FLIP_SOURCE_4       0x004000    // source address is size 4 bytes (ipv4)
+#define FLIP_SOURCE_16      0x006000    // source address is size 16 bytes (ipv6)
+#define FLIP_LENGTH         0x001000
+#define FLIP_CHECKSUM       0x000800
+#define FLIP_NOFRAG         0x000400
+#define FLIP_OPT1           0x000200
+#define FLIP_OPT2           0x000100
+#define FLIP_FRAGOFFSET     0x000040
+#define FLIP_LASTFRAG       0x000020
+#define FLIP_OPT3           0x000010
+#define FLIP_OPT4           0x000008
+#define FLIP_OPT5           0x000004
+#define FLIP_OPT6           0x000002
+#define FLIP_OPT7           0x000001
 
 
 
@@ -68,11 +71,13 @@ struct metaheader
 struct metafields
 {
     uint8_t  version;
-    uint32_t dest;
+    uint64_t dest_hst;
+    uint64_t dest_net;
     uint8_t  type;
     uint8_t  ttl;
     uint32_t flow;
-    uint32_t source;
+    uint64_t src_hst;
+    uint64_t src_net;
     uint16_t length;    //dynamic
     uint16_t checksum;  //dynamic
     uint16_t offset;
@@ -83,92 +88,65 @@ class FlipSocket {
 private:
     metaheader m_metaheader;
     metafields m_metafields;
+    //char *bitmap[4]{};
     
 public:
     //Constructors
-    FlipSocket(){}
+    FlipSocket()
+    {
+        FlipSocket::clear_metaheader();
+        FlipSocket::clear_metafields();
+    }
+    
+    //metaheader bitmap bits
+    void set_metaheader(int32_t bitmask, bool state);
+    bool get_metaheader(uint32_t bitmask);
+    void clear_metaheader();
     
     //header field values
     void set_version(uint8_t ver);
-    void set_dest(uint32_t dest);
+    void set_dest(uint64_t dest);
     void set_type(uint8_t type);
     void set_ttl(uint8_t ttl);
     void set_flow(uint32_t flow);
-    void set_src(uint32_t src);
+    void set_src(uint64_t src);
     void set_len(uint16_t len);
     void set_checksum(uint16_t checksum);
     void set_offset(uint16_t offset);
 
     int get_version()   { return m_metafields.version; };
-    int get_dest()      { return m_metafields.dest; };
+    long get_dest()     { return m_metafields.dest_hst; };
     int get_type()      { return m_metafields.type; };
     int get_ttl()       { return m_metafields.ttl; };
     int get_flow()      { return m_metafields.flow; };
-    int get_src()       { return m_metafields.source; };
+    long get_src()      { return m_metafields.src_hst; };
     int get_len()       { return m_metafields.length; };
     int get_checksum()  { return m_metafields.checksum; };
     int get_offset()    { return m_metafields.offset; };
     
-    //header field values
-    void set_field();
-    int  get_field();
+    void clear_metafields();
     
-    //metaheader bitmap bits
-    void set_bitmap();
-    void set_bitfield();
-    int get_bitmap();
-    int get_bitfield();
-    
+    //other, maybe private?
+    void set_cont_bits();
     
 };
 
+
+/* PUBLIC FUNCTIONS */
 int setsocketopt();
 int getsocketopt();
-
 int read();
 int write();
 
-//typedef struct
-//{
-//    //flip_header headerField;
-//    uint8_t payload[256];
-//
-//} flipPacket;
 
-/* FUNCTION DECLARATIONS */
-//uint32_t test_function(uint32_t num);
-//
-//int setsockopt (int optname, uint32_t optval, int optlen);
-//int getsockopt(int optname, uint32_t *optval);
-//int add_version (uint32_t optva);
-//int add_destination (uint32_t optval, int optlen);
-//int add_length (uint32_t optva);
-//int add_ttl (uint32_t optval);
-//int add_flow (uint32_t optval);
-//int add_source (uint32_t optval, int optlen);
-//int add_protocol (uint32_t optval);
-//int add_checksum (uint32_t optval);
-//
-//char* FLIP_construct_bitmap (void);
-//char* FLIP_construct_header (void);
-//char* FLIP_construct_packet (char *bitmap, char *header, char *payload);
-//
-//int flip_read_packet(char *buff, int buff_len, int *index);
-//int read_bitmap(char *buff, int *i, int *dst_size, int *src_size);
-//int read_header_values(char *buff, int *i, int dst_size, int src_size);
-//
-//void read_rcv_values(void);
-//int get_bitmap_str(char *packet, char *str, int str_len);
-//int get_headervals_str(char *str, int str_len);
-//
-//char* mod_strncat(char *dest, const char *src, size_t n, int *index);
-//void reset_values (uint32_t optval);
-//
-//int get_packet_length();
-//
-//void reset_bitmap(meta_header *bitmap);
-//void reset_header(flip_header *header_values);
-//void read_rcv_flags(void);
+/* HELPER/PRIVATE FUNCTIONS */
+char* get_flip_metaheader(FlipSocket socket);
+char* get_flip_metafields(FlipSocket socket);
+
+/* TEST FUNCTIONS */
+void print_metaheader(FlipSocket s);
+void print_metafields(FlipSocket s);
+
 
 
 #endif /* eflip_h */
