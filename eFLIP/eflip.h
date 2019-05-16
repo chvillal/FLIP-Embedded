@@ -37,6 +37,9 @@
 #define FLIP_OPT6           0x000002
 #define FLIP_OPT7           0x000001
 
+#define FLIP_CONT1      0x800000
+#define FLIP_CONT2      0x008000
+#define FLIP_CONT3      0x000080
 
 
 /* STRUCTURES */
@@ -140,8 +143,8 @@ int write();
 
 
 /* HELPER/PRIVATE FUNCTIONS */
-char* get_flip_metaheader(FlipSocket socket);
-char* get_flip_metafields(FlipSocket socket);
+uint8_t* get_flip_metaheader(FlipSocket s);
+char* get_flip_metafields(FlipSocket s);
 
 /* TEST FUNCTIONS */
 void print_metaheader(FlipSocket s);

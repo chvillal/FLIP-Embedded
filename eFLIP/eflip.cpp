@@ -15,9 +15,7 @@
 
 
 /* DEFINES */
-#define FLIP_CONT1      0x800000
-#define FLIP_CONT2      0x008000
-#define FLIP_CONT3      0x000080
+
 
 //#define BITMAP_MAXLEN   2
 //#define MAX_STR_SIZE    128 //temporary, not sure what max lora string len is...
@@ -219,6 +217,7 @@ bool FlipSocket::get_metaheader(uint32_t bitmask)
         case FLIP_OPT7:
             return m_metaheader.opt7;
         case FLIP_CONT1:
+            //std::cout << "\nLOG: get_metaheader(): return bool: " << m_metaheader.cont1 << std::endl;
             return m_metaheader.cont1;
         case FLIP_CONT2:
             return m_metaheader.cont2;
@@ -280,14 +279,6 @@ int write()
 
 void FlipSocket::set_cont_bits()
 {
-    // if any bitfields set on 2nd byte, enable continuation bit 1
-    if ( m_metaheader.source1 || m_metaheader.source2 || m_metaheader.length || m_metaheader.checksum ||
-         m_metaheader.no_frag || m_metaheader.opt1 || m_metaheader.opt2 )
-    {
-        m_metaheader.cont1 = true;
-    } else {
-        m_metaheader.cont1 = false;
-    }
     
     // if any bitfields set on 3rd byte, enable continuation bits 1 and 2
     if ( m_metaheader.frag_offset || m_metaheader.last_frag || m_metaheader.opt3 || m_metaheader.opt4 ||
@@ -295,27 +286,66 @@ void FlipSocket::set_cont_bits()
     {
         m_metaheader.cont1 = true;
         m_metaheader.cont2 = true;
+        
+    } else if ( m_metaheader.source1 || m_metaheader.source2 || m_metaheader.length || m_metaheader.checksum ||
+        m_metaheader.no_frag || m_metaheader.opt1 || m_metaheader.opt2 )
+    {
+        m_metaheader.cont1 = true;
+        m_metaheader.cont2 = false;
+        //std::cout << "\nLOG: set_cont_bits: cont1=true : " << m_metaheader.cont1 << std::endl;
     } else {
         m_metaheader.cont1 = false;
         m_metaheader.cont2 = false;
+        //std::cout << "LOG: set_cont_bits: cont1=false\n" ;
     }
-
+    
     //redundant under current version, but set for sanity.
     m_metaheader.cont3 = false;
 }
 
 /* HELPER FUNCTIONS */
 
-char* get_flip_metaheader(FlipSocket socket)
+uint8_t* get_flip_metaheader(FlipSocket s)
 {
+    static uint8_t h[4]{};
+    
     // update continuation bits now
-    socket.set_cont_bits();
+    //std::cout << "\nLOG: calling set_cont_bits()\n" ;
+    s.set_cont_bits();
+    s.get_metaheader(FLIP_CONT1)   ? h[0] = h[0] | (FLIP_CONT1 >> 16)  : h[0] = h[0] & (~FLIP_CONT1 >> 16);
+    s.get_metaheader(FLIP_CONT2)   ? h[1] = h[1] | (FLIP_CONT2 >> 8)   : h[1] = h[1] & (~FLIP_CONT2 >> 8);
+    s.get_metaheader(FLIP_CONT3)   ? h[2] = h[2] | (FLIP_CONT3)        : h[2] = h[2] & (~FLIP_CONT3);
+    
+    //parse flipsocket enabled fields to bitmap
+    s.get_metaheader(FLIP_ESP)     ? h[0] = h[0] | (FLIP_ESP >> 16)    : h[0] = h[0] & (~FLIP_ESP >> 16);
+    s.get_metaheader(FLIP_VERSION) ? h[0] = h[0] | (FLIP_VERSION>> 16) : h[0] = h[0] & (~FLIP_VERSION >> 16);
+    s.get_metaheader(FLIP_DEST_4)  ? h[0] = h[0] | (FLIP_DEST_4 >> 16) : h[0] = h[0] & (~FLIP_DEST_4 >> 16);
+    s.get_metaheader(FLIP_DEST_1)  ? h[0] = h[0] | (FLIP_DEST_1 >> 16) : h[0] = h[0] & (~FLIP_DEST_1 >> 16);
+    s.get_metaheader(FLIP_TYPE)    ? h[0] = h[0] | (FLIP_TYPE >> 16)   : h[0] = h[0] & (~FLIP_TYPE >> 16);
+    s.get_metaheader(FLIP_TTL)     ? h[0] = h[0] | (FLIP_TTL >> 16)    : h[0] = h[0] & (~FLIP_TTL >> 16);
+    s.get_metaheader(FLIP_FLOW)    ? h[0] = h[0] | (FLIP_FLOW >> 16)   : h[0] = h[0] & (~FLIP_FLOW >> 16);
+    
+    s.get_metaheader(FLIP_SOURCE_4) ? h[1] = h[1] | (FLIP_SOURCE_4 >> 8) : h[1] = h[1] & (~FLIP_SOURCE_4 >> 8);
+    s.get_metaheader(FLIP_SOURCE_1) ? h[1] = h[1] | (FLIP_SOURCE_1 >> 8) : h[1] = h[1] & (~FLIP_SOURCE_1 >> 8);
+    s.get_metaheader(FLIP_LENGTH)   ? h[1] = h[1] | (FLIP_LENGTH >> 8)   : h[1] = h[1] & (~FLIP_LENGTH >> 8);
+    s.get_metaheader(FLIP_CHECKSUM) ? h[1] = h[1] | (FLIP_CHECKSUM >> 8) : h[1] = h[1] & (~FLIP_CHECKSUM >> 8);
+    s.get_metaheader(FLIP_NOFRAG)   ? h[1] = h[1] | (FLIP_NOFRAG >> 8)   : h[1] = h[1] & (~FLIP_NOFRAG >> 8);
+    s.get_metaheader(FLIP_OPT1)     ? h[1] = h[1] | (FLIP_OPT1 >> 8)     : h[1] = h[1] & (~FLIP_OPT1 >> 8);
+    s.get_metaheader(FLIP_OPT2)     ? h[1] = h[1] | (FLIP_OPT2 >> 8)     : h[1] = h[1] & (~FLIP_OPT2 >> 8);
+    
+    s.get_metaheader(FLIP_FRAGOFFSET) ? h[2] = h[2] | FLIP_FRAGOFFSET : h[2] = h[2] & ~FLIP_FRAGOFFSET;
+    s.get_metaheader(FLIP_LASTFRAG)   ? h[2] = h[2] | FLIP_LASTFRAG   : h[2] = h[2] & ~FLIP_LASTFRAG;
+    s.get_metaheader(FLIP_OPT3)       ? h[2] = h[2] | FLIP_OPT3       : h[2] = h[2] & ~FLIP_OPT3;
+    s.get_metaheader(FLIP_OPT4)       ? h[2] = h[2] | FLIP_OPT4       : h[2] = h[2] & ~FLIP_OPT4;
+    s.get_metaheader(FLIP_OPT5)       ? h[2] = h[2] | FLIP_OPT5       : h[2] = h[2] & ~FLIP_OPT5;
+    s.get_metaheader(FLIP_OPT6)       ? h[2] = h[2] | FLIP_OPT6       : h[2] = h[2] & ~FLIP_OPT6;
+    s.get_metaheader(FLIP_OPT7)       ? h[2] = h[2] | FLIP_OPT7       : h[2] = h[2] & ~FLIP_OPT7;
     
     //create 
-    return 0x00;
+    return h;
 }
 
-char* get_flip_metafields(FlipSocket socket)
+char* get_flip_metafields(FlipSocket s)
 {
     return 0x00;
 }
@@ -347,6 +377,7 @@ void print_metaheader(FlipSocket s)
     std::cout << "\nopt5: " << s.get_metaheader(FLIP_OPT5);
     std::cout << "\nopt6: " << s.get_metaheader(FLIP_OPT6);
     std::cout << "\nopt7: " << s.get_metaheader(FLIP_OPT7);
+    std::cout << "\n";
 }
 
 void print_metafields(FlipSocket s)
