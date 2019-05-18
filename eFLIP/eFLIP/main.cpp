@@ -11,40 +11,12 @@
 #include "eflip.h"
 
 void test_metaheader(void);
+void test_metafields(void);
 
 int main(int argc, const char * argv[]) {
     
     test_metaheader();
-    
-//    mysocket.set_version(0);
-//    mysocket.set_dest(128);
-//    mysocket.set_type(4);
-//    mysocket.set_ttl(3);
-//    mysocket.set_flow(65535);
-//    mysocket.set_src(48);
-//    mysocket.set_len(16);
-//    mysocket.set_checksum(234);
-//    mysocket.set_offset(45);
-
-    
-//    //TEST bitwise operations and bitmap builder
-//    int x = 0x400000;
-//    uint8_t y[4]{};
-//    std::cout << std::dec << x << std::endl;
-//    std::cout << std::hex << x << std::endl;
-//
-//    y[0] = y[0] | (x >> 16);
-//
-//    std::cout << std::dec << (int) y[0] << std::endl;
-//    std::cout << std::hex << (int) y[0] << std::endl;
-//
-//    char *a;
-//
-//    a = (char *) y;
-//
-//    std::cout << std::dec << (int) *a << std::endl;
-//    std::cout << std::hex << (int) *a << std::endl;
-    
+    //test_metafields();
     
     return 0;
 }
@@ -52,6 +24,7 @@ int main(int argc, const char * argv[]) {
 void test_metaheader(void)
 {
     FlipSocket mysocket;
+    SocketHandler handler;
     
     //print_metaheader(mysocket);
     std::cout << "\n\n";
@@ -67,19 +40,73 @@ void test_metaheader(void)
     //    mysocket.set_metaheader(FLIP_NOFRAG, true );
     //    mysocket.set_metaheader(FLIP_LASTFRAG, true );
 
-    std::cout << "\n";
-    mysocket.set_cont_bits();
-    
-    print_metaheader(mysocket);
-    std::cout << "\n";
-    
     uint8_t *a;
-    a = get_flip_metaheader(mysocket);
-    std::cout << std::hex << (int) *a << " " << (int) *(a+1) << " " <<  (int) *(a+2) << std::endl;
-    std::cout << std::string((char*) a) << std::string((char*) a+1) << std::string((char*) a+2) << std::endl;
-    std::cout << std::bitset<8> (*a) << " " << std::bitset<8> (*(a+1)) << " " << std::bitset<8> (*(a+2))<<  std::endl;
+    handler.get_flip_metaheader(mysocket);
+    a = handler.get_bitmap();
     
+    int max = handler.get_bitmap_size();
+    
+    mysocket.set_cont_bits();
+    std::cout << "max= " << max << std::endl;
+    
+    for (int i=0; i<max; i++ ){
+        std::cout << std::hex << (int) *(a+i) << " ";
+    }
     std::cout << "\n";
-    //print_metaheader(mysocket);
+    
+    for (int i=0; i<max; i++ ){
+        std::cout << std::bitset<8> (*(a+i)) << " " ;
+    }
     std::cout << "\n";
+
+}
+
+void test_metafields(void)
+{
+    FlipSocket mysocket;
+    SocketHandler handler;
+    
+//    mysocket.set_metaheader(FLIP_ESP, false);
+    mysocket.set_metaheader(FLIP_VERSION, true);
+    mysocket.set_metaheader(FLIP_DEST_1, true);
+    mysocket.set_metaheader(FLIP_TYPE, true);
+    mysocket.set_metaheader(FLIP_TTL, true);
+    mysocket.set_metaheader(FLIP_FLOW, true );
+    mysocket.set_metaheader(FLIP_SOURCE_1, true );
+    mysocket.set_metaheader(FLIP_LENGTH, true );
+    mysocket.set_metaheader(FLIP_CHECKSUM, true );
+//    mysocket.set_metaheader(FLIP_NOFRAG, true );
+//    mysocket.set_metaheader(FLIP_LASTFRAG, true );
+    
+        mysocket.set_version(1);
+        mysocket.set_dest(128);
+        mysocket.set_type(4);
+        mysocket.set_ttl(3);
+        mysocket.set_flow(1024);
+        mysocket.set_src(48);
+        mysocket.set_len(16);
+        mysocket.set_checksum(234);
+//        mysocket.set_offset(45);
+    
+//    uint8_t *a;
+//    mysocket.set_cont_bits();
+//    a = get_flip_metaheader(mysocket);
+
+    uint8_t *m;
+    handler.get_flip_metafields(mysocket);
+    m = handler.get_metafields();
+    int max = handler.get_fields_size();
+    
+    std::cout << "max= " << max << std::endl;
+    
+    for (int i=0; i<=max; i++ ){
+        std::cout << std::hex << (int) *(m+i) << " ";
+    }
+    std::cout << "\n";
+    
+    for (int i=0; i<=max; i++ ){
+        std::cout << std::bitset<8> (*(m+i)) << " " ;
+    }
+    std::cout << "\n";
+    
 }

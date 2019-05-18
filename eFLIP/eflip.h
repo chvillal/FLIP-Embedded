@@ -37,9 +37,8 @@
 #define FLIP_OPT6           0x000002
 #define FLIP_OPT7           0x000001
 
-#define FLIP_CONT1      0x800000
-#define FLIP_CONT2      0x008000
-#define FLIP_CONT3      0x000080
+#define FLIP_MAX_BITMAP_SIZE    3
+#define FLIP_MAX_FIELDS_SIZE    47
 
 
 /* STRUCTURES */
@@ -87,6 +86,9 @@ struct metafields
 };
 
 /* CLASSES */
+
+// FLIPSOCKET CLASS stores all information relevant to a single Flip socket
+// provides cuntionality to set, get, and clear bits and corresponding fields
 class FlipSocket {
 private:
     metaheader m_metaheader;
@@ -134,6 +136,32 @@ public:
     
 };
 
+// PACKET CLASS provides functionality to construct, and read
+// FLIPSOCKET packets.
+class SocketHandler {
+private:
+    int bitmap_size;
+    int fields_size;
+    uint8_t m_bitmap[FLIP_MAX_BITMAP_SIZE+1]{};
+    uint8_t m_fields[FLIP_MAX_FIELDS_SIZE+1]{};
+    //FlipSocket socket;
+    //bool modified;
+    
+public:
+    //constructor
+    SocketHandler(){}
+    
+    //build bitmap and fields
+    void get_flip_metaheader(FlipSocket s);
+    void get_flip_metafields(FlipSocket s);
+    
+    uint8_t* get_metafields() {return m_fields;};
+    int get_fields_size() {return fields_size;};
+    
+    uint8_t* get_bitmap() {return m_bitmap;};
+    int get_bitmap_size() {return bitmap_size;};
+    
+};
 
 /* PUBLIC FUNCTIONS */
 int setsocketopt();
@@ -143,8 +171,7 @@ int write();
 
 
 /* HELPER/PRIVATE FUNCTIONS */
-uint8_t* get_flip_metaheader(FlipSocket s);
-char* get_flip_metafields(FlipSocket s);
+//uint8_t* get_flip_metaheader(FlipSocket s);
 
 /* TEST FUNCTIONS */
 void print_metaheader(FlipSocket s);

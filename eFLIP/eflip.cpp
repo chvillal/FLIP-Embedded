@@ -15,7 +15,9 @@
 
 
 /* DEFINES */
-
+#define FLIP_CONT1      0x800000
+#define FLIP_CONT2      0x008000
+#define FLIP_CONT3      0x000080
 
 //#define BITMAP_MAXLEN   2
 //#define MAX_STR_SIZE    128 //temporary, not sure what max lora string len is...
@@ -305,50 +307,154 @@ void FlipSocket::set_cont_bits()
 
 /* HELPER FUNCTIONS */
 
-uint8_t* get_flip_metaheader(FlipSocket s)
+void SocketHandler::get_flip_metaheader(FlipSocket s)
 {
-    static uint8_t h[4]{};
+    //int bitmap_size;
+    //uint8_t m_bitmap[FLIP_MAX_BITMAP_SIZE+1]{};
     
     // update continuation bits now
-    //std::cout << "\nLOG: calling set_cont_bits()\n" ;
     s.set_cont_bits();
-    s.get_metaheader(FLIP_CONT1)   ? h[0] = h[0] | (FLIP_CONT1 >> 16)  : h[0] = h[0] & (~FLIP_CONT1 >> 16);
-    s.get_metaheader(FLIP_CONT2)   ? h[1] = h[1] | (FLIP_CONT2 >> 8)   : h[1] = h[1] & (~FLIP_CONT2 >> 8);
-    s.get_metaheader(FLIP_CONT3)   ? h[2] = h[2] | (FLIP_CONT3)        : h[2] = h[2] & (~FLIP_CONT3);
+    s.get_metaheader(FLIP_CONT1)   ? m_bitmap[0] = m_bitmap[0] | (FLIP_CONT1 >> 16)  : m_bitmap[0] = m_bitmap[0] & (~FLIP_CONT1 >> 16);
+    s.get_metaheader(FLIP_CONT2)   ? m_bitmap[1] = m_bitmap[1] | (FLIP_CONT2 >> 8)   : m_bitmap[1] = m_bitmap[1] & (~FLIP_CONT2 >> 8);
+    s.get_metaheader(FLIP_CONT3)   ? m_bitmap[2] = m_bitmap[2] | (FLIP_CONT3)        : m_bitmap[2] = m_bitmap[2] & (~FLIP_CONT3);
     
     //parse flipsocket enabled fields to bitmap
-    s.get_metaheader(FLIP_ESP)     ? h[0] = h[0] | (FLIP_ESP >> 16)    : h[0] = h[0] & (~FLIP_ESP >> 16);
-    s.get_metaheader(FLIP_VERSION) ? h[0] = h[0] | (FLIP_VERSION>> 16) : h[0] = h[0] & (~FLIP_VERSION >> 16);
-    s.get_metaheader(FLIP_DEST_4)  ? h[0] = h[0] | (FLIP_DEST_4 >> 16) : h[0] = h[0] & (~FLIP_DEST_4 >> 16);
-    s.get_metaheader(FLIP_DEST_1)  ? h[0] = h[0] | (FLIP_DEST_1 >> 16) : h[0] = h[0] & (~FLIP_DEST_1 >> 16);
-    s.get_metaheader(FLIP_TYPE)    ? h[0] = h[0] | (FLIP_TYPE >> 16)   : h[0] = h[0] & (~FLIP_TYPE >> 16);
-    s.get_metaheader(FLIP_TTL)     ? h[0] = h[0] | (FLIP_TTL >> 16)    : h[0] = h[0] & (~FLIP_TTL >> 16);
-    s.get_metaheader(FLIP_FLOW)    ? h[0] = h[0] | (FLIP_FLOW >> 16)   : h[0] = h[0] & (~FLIP_FLOW >> 16);
+    s.get_metaheader(FLIP_ESP)     ? m_bitmap[0] = m_bitmap[0] | (FLIP_ESP >> 16)    : m_bitmap[0] = m_bitmap[0] & (~FLIP_ESP >> 16);
+    s.get_metaheader(FLIP_VERSION) ? m_bitmap[0] = m_bitmap[0] | (FLIP_VERSION>> 16) : m_bitmap[0] = m_bitmap[0] & (~FLIP_VERSION >> 16);
+    s.get_metaheader(FLIP_DEST_4)  ? m_bitmap[0] = m_bitmap[0] | (FLIP_DEST_4 >> 16) : m_bitmap[0] = m_bitmap[0] & (~FLIP_DEST_4 >> 16);
+    s.get_metaheader(FLIP_DEST_1)  ? m_bitmap[0] = m_bitmap[0] | (FLIP_DEST_1 >> 16) : m_bitmap[0] = m_bitmap[0] & (~FLIP_DEST_1 >> 16);
+    s.get_metaheader(FLIP_TYPE)    ? m_bitmap[0] = m_bitmap[0] | (FLIP_TYPE >> 16)   : m_bitmap[0] = m_bitmap[0] & (~FLIP_TYPE >> 16);
+    s.get_metaheader(FLIP_TTL)     ? m_bitmap[0] = m_bitmap[0] | (FLIP_TTL >> 16)    : m_bitmap[0] = m_bitmap[0] & (~FLIP_TTL >> 16);
+    s.get_metaheader(FLIP_FLOW)    ? m_bitmap[0] = m_bitmap[0] | (FLIP_FLOW >> 16)   : m_bitmap[0] = m_bitmap[0] & (~FLIP_FLOW >> 16);
     
-    s.get_metaheader(FLIP_SOURCE_4) ? h[1] = h[1] | (FLIP_SOURCE_4 >> 8) : h[1] = h[1] & (~FLIP_SOURCE_4 >> 8);
-    s.get_metaheader(FLIP_SOURCE_1) ? h[1] = h[1] | (FLIP_SOURCE_1 >> 8) : h[1] = h[1] & (~FLIP_SOURCE_1 >> 8);
-    s.get_metaheader(FLIP_LENGTH)   ? h[1] = h[1] | (FLIP_LENGTH >> 8)   : h[1] = h[1] & (~FLIP_LENGTH >> 8);
-    s.get_metaheader(FLIP_CHECKSUM) ? h[1] = h[1] | (FLIP_CHECKSUM >> 8) : h[1] = h[1] & (~FLIP_CHECKSUM >> 8);
-    s.get_metaheader(FLIP_NOFRAG)   ? h[1] = h[1] | (FLIP_NOFRAG >> 8)   : h[1] = h[1] & (~FLIP_NOFRAG >> 8);
-    s.get_metaheader(FLIP_OPT1)     ? h[1] = h[1] | (FLIP_OPT1 >> 8)     : h[1] = h[1] & (~FLIP_OPT1 >> 8);
-    s.get_metaheader(FLIP_OPT2)     ? h[1] = h[1] | (FLIP_OPT2 >> 8)     : h[1] = h[1] & (~FLIP_OPT2 >> 8);
+    s.get_metaheader(FLIP_SOURCE_4) ? m_bitmap[1] = m_bitmap[1] | (FLIP_SOURCE_4 >> 8) : m_bitmap[1] = m_bitmap[1] & (~FLIP_SOURCE_4 >> 8);
+    s.get_metaheader(FLIP_SOURCE_1) ? m_bitmap[1] = m_bitmap[1] | (FLIP_SOURCE_1 >> 8) : m_bitmap[1] = m_bitmap[1] & (~FLIP_SOURCE_1 >> 8);
+    s.get_metaheader(FLIP_LENGTH)   ? m_bitmap[1] = m_bitmap[1] | (FLIP_LENGTH >> 8)   : m_bitmap[1] = m_bitmap[1] & (~FLIP_LENGTH >> 8);
+    s.get_metaheader(FLIP_CHECKSUM) ? m_bitmap[1] = m_bitmap[1] | (FLIP_CHECKSUM >> 8) : m_bitmap[1] = m_bitmap[1] & (~FLIP_CHECKSUM >> 8);
+    s.get_metaheader(FLIP_NOFRAG)   ? m_bitmap[1] = m_bitmap[1] | (FLIP_NOFRAG >> 8)   : m_bitmap[1] = m_bitmap[1] & (~FLIP_NOFRAG >> 8);
+    s.get_metaheader(FLIP_OPT1)     ? m_bitmap[1] = m_bitmap[1] | (FLIP_OPT1 >> 8)     : m_bitmap[1] = m_bitmap[1] & (~FLIP_OPT1 >> 8);
+    s.get_metaheader(FLIP_OPT2)     ? m_bitmap[1] = m_bitmap[1] | (FLIP_OPT2 >> 8)     : m_bitmap[1] = m_bitmap[1] & (~FLIP_OPT2 >> 8);
     
-    s.get_metaheader(FLIP_FRAGOFFSET) ? h[2] = h[2] | FLIP_FRAGOFFSET : h[2] = h[2] & ~FLIP_FRAGOFFSET;
-    s.get_metaheader(FLIP_LASTFRAG)   ? h[2] = h[2] | FLIP_LASTFRAG   : h[2] = h[2] & ~FLIP_LASTFRAG;
-    s.get_metaheader(FLIP_OPT3)       ? h[2] = h[2] | FLIP_OPT3       : h[2] = h[2] & ~FLIP_OPT3;
-    s.get_metaheader(FLIP_OPT4)       ? h[2] = h[2] | FLIP_OPT4       : h[2] = h[2] & ~FLIP_OPT4;
-    s.get_metaheader(FLIP_OPT5)       ? h[2] = h[2] | FLIP_OPT5       : h[2] = h[2] & ~FLIP_OPT5;
-    s.get_metaheader(FLIP_OPT6)       ? h[2] = h[2] | FLIP_OPT6       : h[2] = h[2] & ~FLIP_OPT6;
-    s.get_metaheader(FLIP_OPT7)       ? h[2] = h[2] | FLIP_OPT7       : h[2] = h[2] & ~FLIP_OPT7;
+    s.get_metaheader(FLIP_FRAGOFFSET) ? m_bitmap[2] = m_bitmap[2] | FLIP_FRAGOFFSET : m_bitmap[2] = m_bitmap[2] & ~FLIP_FRAGOFFSET;
+    s.get_metaheader(FLIP_LASTFRAG)   ? m_bitmap[2] = m_bitmap[2] | FLIP_LASTFRAG   : m_bitmap[2] = m_bitmap[2] & ~FLIP_LASTFRAG;
+    s.get_metaheader(FLIP_OPT3)       ? m_bitmap[2] = m_bitmap[2] | FLIP_OPT3       : m_bitmap[2] = m_bitmap[2] & ~FLIP_OPT3;
+    s.get_metaheader(FLIP_OPT4)       ? m_bitmap[2] = m_bitmap[2] | FLIP_OPT4       : m_bitmap[2] = m_bitmap[2] & ~FLIP_OPT4;
+    s.get_metaheader(FLIP_OPT5)       ? m_bitmap[2] = m_bitmap[2] | FLIP_OPT5       : m_bitmap[2] = m_bitmap[2] & ~FLIP_OPT5;
+    s.get_metaheader(FLIP_OPT6)       ? m_bitmap[2] = m_bitmap[2] | FLIP_OPT6       : m_bitmap[2] = m_bitmap[2] & ~FLIP_OPT6;
+    s.get_metaheader(FLIP_OPT7)       ? m_bitmap[2] = m_bitmap[2] | FLIP_OPT7       : m_bitmap[2] = m_bitmap[2] & ~FLIP_OPT7;
+
+    if (s.get_metaheader(FLIP_CONT3)){
+        bitmap_size = 4;
+    } else if (s.get_metaheader(FLIP_CONT2)) {
+        bitmap_size = 3;
+    } else if (s.get_metaheader(FLIP_CONT1)){
+        bitmap_size = 2;
+    } else {
+        bitmap_size = 1;
+    }
     
-    //create 
-    return h;
 }
 
-char* get_flip_metafields(FlipSocket s)
+void SocketHandler::get_flip_metafields(FlipSocket s)
 {
-    return 0x00;
+    //int fields_size;
+    //uint8_t m_fields[FLIP_MAX_FIELDS_SIZE+1]{};
+    int index = 0;
+    
+    if (s.get_metaheader(FLIP_VERSION)){
+        m_fields[index] = s.get_version();
+        index++;
+    }
+    
+    if (s.get_metaheader(FLIP_DEST_16))
+    {
+        //first byte tells size, 1-16 for now
+        //implementation pending
+        
+    } else if (s.get_metaheader(FLIP_DEST_4)) {
+        m_fields[index] = (s.get_dest() & 0xFF000000) >> 24;
+        index++;
+        m_fields[index] = (s.get_dest() & 0xFF0000) >> 16;
+        index++;
+        m_fields[index] = (s.get_dest() & 0xFF00) >> 8;
+        index++;
+        m_fields[index] = (s.get_dest() & 0xFF);
+        index++;
+        
+    } else if (s.get_metaheader(FLIP_DEST_1)) {
+        m_fields[index] = (s.get_dest() & 0xFF);
+        index++;
+    }
+    
+    if (s.get_metaheader(FLIP_TYPE)) {
+        m_fields[index] = s.get_type();
+        index++;
+    }
+    
+    if (s.get_metaheader(FLIP_TTL)) {
+        m_fields[index] = s.get_ttl();
+        index++;
+    }
+    
+    if (s.get_metaheader(FLIP_FLOW)) {
+        m_fields[index] = (s.get_flow() & 0xFF000000) >> 24;
+        index++;
+        m_fields[index] = (s.get_flow() & 0xFF0000) >> 16;
+        index++;
+        m_fields[index] = (s.get_flow() & 0xFF00) >> 8;
+        index++;
+        m_fields[index] = (s.get_flow() & 0xFF);
+        index++;
+    }
+    
+    if (s.get_metaheader(FLIP_SOURCE_16))
+    {
+        //first byte tells size, 1-16 for now
+        //implementation pending
+        
+    } else if (s.get_metaheader(FLIP_SOURCE_4)) {
+        m_fields[index] = (s.get_src() & 0xFF000000) >> 24;
+        index++;
+        m_fields[index] = (s.get_src() & 0xFF0000) >> 16;
+        index++;
+        m_fields[index] = (s.get_src() & 0xFF00) >> 8;
+        index++;
+        m_fields[index] = (s.get_src() & 0xFF);
+        index++;
+        
+    } else if (s.get_metaheader(FLIP_SOURCE_1)) {
+        m_fields[index] = (s.get_src() & 0xFF);
+        index++;
+    }
+    
+    if (s.get_metaheader(FLIP_LENGTH)) {
+        m_fields[index] = (s.get_len() & 0xFF00) >> 8;
+        index++;
+        m_fields[index] = (s.get_len() & 0xFF);
+        index++;
+    }
+    
+    if (s.get_metaheader(FLIP_CHECKSUM)) {
+        m_fields[index] = (s.get_checksum() & 0xFF00) >> 8;
+        index++;
+        m_fields[index] = (s.get_checksum() & 0xFF);
+        index++;
+    }
+    
+    if (s.get_metaheader(FLIP_FRAGOFFSET)) {
+        m_fields[index] = (s.get_offset() & 0xFF00) >> 8;
+        index++;
+        m_fields[index] = (s.get_offset() & 0xFF);
+        index++;
+    }
+    
+    //at this point, index is pointing to a null bit alfter the last field
+    //in m_fields.
+    if (index != 0){
+        fields_size = index - 1;
+    }
 }
+
 
 /* TEST FUNCTIONS */
 void print_metaheader(FlipSocket s)
