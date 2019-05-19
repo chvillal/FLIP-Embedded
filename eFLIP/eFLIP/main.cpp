@@ -34,11 +34,11 @@ void test_metaheader(void)
     mysocket.set_metaheader(FLIP_TYPE, true);
     mysocket.set_metaheader(FLIP_TTL, true);
     mysocket.set_metaheader(FLIP_FLOW, true );
-    //    mysocket.set_metaheader(FLIP_SOURCE_1, true );
-    //    mysocket.set_metaheader(FLIP_LENGTH, true );
-    //    mysocket.set_metaheader(FLIP_CHECKSUM, true );
-    //    mysocket.set_metaheader(FLIP_NOFRAG, true );
-    //    mysocket.set_metaheader(FLIP_LASTFRAG, true );
+    mysocket.set_metaheader(FLIP_SOURCE_1, true );
+    mysocket.set_metaheader(FLIP_LENGTH, true );
+    mysocket.set_metaheader(FLIP_CHECKSUM, true );
+    mysocket.set_metaheader(FLIP_NOFRAG, true );
+    mysocket.set_metaheader(FLIP_LASTFRAG, true );
 
     uint8_t *a;
     handler.get_flip_metaheader(mysocket);
@@ -57,8 +57,15 @@ void test_metaheader(void)
     for (int i=0; i<max; i++ ){
         std::cout << std::bitset<8> (*(a+i)) << " " ;
     }
+    
     std::cout << "\n";
-
+    std::cout << "\n";
+    
+    SocketHandler h_rcv;
+    FlipSocket f_rcv;
+    h_rcv.parse_flip_metaheader(&f_rcv, a, max);
+    std::cout << "\n";
+    print_metaheader(f_rcv);
 }
 
 void test_metafields(void)
@@ -107,6 +114,5 @@ void test_metafields(void)
     for (int i=0; i<=max; i++ ){
         std::cout << std::bitset<8> (*(m+i)) << " " ;
     }
-    std::cout << "\n";
     
 }

@@ -161,6 +161,8 @@ public:
     uint8_t* get_bitmap() {return m_bitmap;};
     int get_bitmap_size() {return bitmap_size;};
     
+    int parse_flip_metaheader(FlipSocket *s, uint8_t *message, int m_size);
+    int parse_flip_metafields(FlipSocket s, uint8_t *message, int m_size);
 };
 
 /* PUBLIC FUNCTIONS */

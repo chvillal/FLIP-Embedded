@@ -88,6 +88,15 @@ void FlipSocket::set_metaheader(int32_t bitmask, bool state)
 {
     switch(bitmask)
     {
+        case FLIP_CONT1:
+            m_metaheader.cont1 = state;
+            break;
+        case FLIP_CONT2:
+            m_metaheader.cont2 = state;
+            break;
+        case FLIP_CONT3:
+            m_metaheader.cont3 = state;
+            break;
         case FLIP_ESP:
             m_metaheader.esp = state;
             break;
@@ -455,6 +464,76 @@ void SocketHandler::get_flip_metafields(FlipSocket s)
     }
 }
 
+int SocketHandler::parse_flip_metaheader(FlipSocket *s, uint8_t *message, int m_size)
+{
+    
+    int i = 0;
+    if (m_size < 1) {return 0;};
+    
+    // check if larger than 1 byte bitmap
+    (message[i] & (FLIP_CONT1 >> 16))   ? s->set_metaheader(FLIP_CONT1, true)  : s->set_metaheader(FLIP_CONT1, false);
+    (message[i] & (FLIP_ESP >> 16))     ? s->set_metaheader(FLIP_ESP, true)    : s->set_metaheader(FLIP_ESP, false);
+    (message[i] & (FLIP_VERSION >> 16)) ? s->set_metaheader(FLIP_VERSION, true): s->set_metaheader(FLIP_VERSION, false);
+    (message[i] & (FLIP_DEST_4 >> 16))  ? s->set_metaheader(FLIP_DEST_4, true) : s->set_metaheader(FLIP_DEST_4 , false);
+    (message[i] & (FLIP_DEST_1 >> 16))  ? s->set_metaheader(FLIP_DEST_1, true) : s->set_metaheader(FLIP_DEST_1 , false);
+    (message[i] & (FLIP_TYPE >> 16))    ? s->set_metaheader(FLIP_TYPE, true)   : s->set_metaheader(FLIP_TYPE , false);
+    (message[i] & (FLIP_TTL >> 16))     ? s->set_metaheader(FLIP_TTL, true)    : s->set_metaheader(FLIP_TTL , false);
+    (message[i] & (FLIP_FLOW >> 16))    ? s->set_metaheader(FLIP_FLOW, true)   : s->set_metaheader(FLIP_FLOW , false);
+    i++;
+    
+//    std::cout << std::hex << std::bitset<8> (*(message+0)) << " " ;
+//    std::cout << std::hex << std::bitset<8> (*(message+1)) << " \n" ;
+//    std::cout << "cont1: " << (message[0] & (FLIP_CONT1 >> 16)) << " \n";
+//
+//    if(message[0] & (FLIP_CONT1 >> 16)){
+//        std::cout << "true cout1\n";
+//    } else {
+//        std::cout << "false cout1\n";
+//    }
+    
+    if (s->get_metaheader(FLIP_CONT1) == false){
+        //std::cout << "byte1 exit ";
+        return i;
+    }
+    
+    (message[i] & (FLIP_CONT2 >> 8))    ? s->set_metaheader(FLIP_CONT2, true)   : s->set_metaheader(FLIP_CONT2 , false);
+    (message[i] & (FLIP_SOURCE_4 >> 8)) ? s->set_metaheader(FLIP_SOURCE_4, true): s->set_metaheader(FLIP_SOURCE_4 , false);
+    (message[i] & (FLIP_SOURCE_1 >> 8)) ? s->set_metaheader(FLIP_SOURCE_1, true): s->set_metaheader(FLIP_SOURCE_1 , false);
+    (message[i] & (FLIP_LENGTH >> 8))   ? s->set_metaheader(FLIP_LENGTH, true)  : s->set_metaheader(FLIP_LENGTH , false);
+    (message[i] & (FLIP_CHECKSUM >> 8)) ? s->set_metaheader(FLIP_CHECKSUM, true): s->set_metaheader(FLIP_CHECKSUM , false);
+    (message[i] & (FLIP_NOFRAG >> 8))   ? s->set_metaheader(FLIP_NOFRAG, true)  : s->set_metaheader(FLIP_NOFRAG , false);
+    (message[i] & (FLIP_OPT1 >> 8))     ? s->set_metaheader(FLIP_OPT1, true)    : s->set_metaheader(FLIP_OPT1 , false);
+    (message[i] & (FLIP_OPT2 >> 8))     ? s->set_metaheader(FLIP_OPT2, true)    : s->set_metaheader(FLIP_OPT2 , false);
+    i++;
+    
+    if (s->get_metaheader(FLIP_CONT2) == false){
+        //std::cout << "byte2 exit ";
+        return i;
+    }
+    
+    (message[i] & FLIP_CONT3 )      ? s->set_metaheader(FLIP_CONT3, true)     : s->set_metaheader(FLIP_CONT3 , false);
+    (message[i] & FLIP_FRAGOFFSET ) ? s->set_metaheader(FLIP_FRAGOFFSET, true): s->set_metaheader(FLIP_FRAGOFFSET , false);
+    (message[i] & FLIP_LASTFRAG )   ? s->set_metaheader(FLIP_LASTFRAG, true)  : s->set_metaheader(FLIP_LASTFRAG , false);
+    (message[i] & FLIP_OPT3 )       ? s->set_metaheader(FLIP_OPT3, true)      : s->set_metaheader(FLIP_OPT3 , false);
+    (message[i] & FLIP_OPT4 )       ? s->set_metaheader(FLIP_OPT4, true)      : s->set_metaheader(FLIP_OPT4 , false);
+    (message[i] & FLIP_OPT5 )       ? s->set_metaheader(FLIP_OPT5, true)      : s->set_metaheader(FLIP_OPT5 , false);
+    (message[i] & FLIP_OPT6 )       ? s->set_metaheader(FLIP_OPT6, true)      : s->set_metaheader(FLIP_OPT6 , false);
+    (message[i] & FLIP_OPT7 )       ? s->set_metaheader(FLIP_OPT7, true)      : s->set_metaheader(FLIP_OPT7 , false);
+    i++;
+    
+    if (s->get_metaheader(FLIP_CONT3) == false){
+        //std::cout << "byte3 exit ";
+        return i;
+    }
+    
+    //if gets here -> error - not implemented yet
+    return -1;
+}
+
+int SocketHandler::parse_flip_metafields(FlipSocket s, uint8_t *message, int m_size)
+{
+    return 0;
+}
 
 /* TEST FUNCTIONS */
 void print_metaheader(FlipSocket s)
@@ -477,7 +556,7 @@ void print_metaheader(FlipSocket s)
     std::cout << "\nopt2: " << s.get_metaheader(FLIP_OPT2);
     std::cout << "\ncont3: " << s.get_metaheader(FLIP_CONT3);
     std::cout << "\nfrag_offset: " << s.get_metaheader(FLIP_FRAGOFFSET);
-    std::cout << "\nlast-frag" << s.get_metaheader(FLIP_LASTFRAG);
+    std::cout << "\nlast-frag: " << s.get_metaheader(FLIP_LASTFRAG);
     std::cout << "\nopt3: " << s.get_metaheader(FLIP_OPT3);
     std::cout << "\nopt4: " << s.get_metaheader(FLIP_OPT4);
     std::cout << "\nopt5: " << s.get_metaheader(FLIP_OPT5);
