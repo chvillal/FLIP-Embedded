@@ -316,7 +316,7 @@ void FlipSocket::set_cont_bits()
 
 /* HELPER FUNCTIONS */
 
-void SocketHandler::get_flip_metaheader(FlipSocket s)
+void SocketHandler::build_metaheader(FlipSocket s)
 {
     //int bitmap_size;
     //uint8_t m_bitmap[FLIP_MAX_BITMAP_SIZE+1]{};
@@ -364,7 +364,7 @@ void SocketHandler::get_flip_metaheader(FlipSocket s)
     
 }
 
-void SocketHandler::get_flip_metafields(FlipSocket s)
+void SocketHandler::build_metafields(FlipSocket s)
 {
     //int fields_size;
     //uint8_t m_fields[FLIP_MAX_FIELDS_SIZE+1]{};
@@ -525,14 +525,123 @@ int SocketHandler::parse_flip_metaheader(FlipSocket *s, uint8_t *message, int m_
         //std::cout << "byte3 exit ";
         return i;
     }
-    
-    //if gets here -> error - not implemented yet
+    //if gets here -> error : not implemented yet
     return -1;
 }
 
-int SocketHandler::parse_flip_metafields(FlipSocket s, uint8_t *message, int m_size)
+int SocketHandler::parse_flip_metafields(FlipSocket *s, uint8_t *message, int m_size, int index)
 {
-    return 0;
+    int i = index;
+    uint32_t byte4_t;
+    
+    s->clear_metafields();
+    
+    if (s->get_metaheader(FLIP_VERSION)) {
+        s->set_version(message[i]);
+        i++;
+    }
+    
+    if (s->get_metaheader(FLIP_DEST_16)) {
+        //implementation pending
+        
+    } else if (s->get_metaheader(FLIP_DEST_4)) {
+        byte4_t = 0;
+        byte4_t = message[i] << 24;
+        i++;
+        byte4_t = byte4_t | (message[i] << 16);
+        i++;
+        byte4_t = byte4_t | (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        s->set_dest(byte4_t);
+
+    } else if (s->get_metaheader(FLIP_DEST_1)) {
+        s->set_dest(message[i]);
+        i++;
+    }
+    
+    if (s->get_metaheader(FLIP_TYPE)) {
+        s->set_type(message[i]);
+        i++;
+    }
+    
+    if (s->get_metaheader(FLIP_TTL)) {
+        s->set_ttl(message[i]);
+        i++;
+    }
+    
+    if (s->get_metaheader(FLIP_FLOW)) {
+        byte4_t = 0;
+        byte4_t = message[i] << 24;
+        i++;
+        byte4_t = byte4_t | (message[i] << 16);
+        i++;
+        byte4_t = byte4_t | (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        s->set_flow(byte4_t);
+    }
+    
+    if (s->get_metaheader(FLIP_SOURCE_16)) {
+        //implementation pending
+        
+    } else if (s->get_metaheader(FLIP_SOURCE_4)) {
+        byte4_t = 0;
+        byte4_t = message[i] << 24;
+        i++;
+        byte4_t = byte4_t | (message[i] << 16);
+        i++;
+        byte4_t = byte4_t | (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        s->set_src(byte4_t);
+        
+    } else if (s->get_metaheader(FLIP_SOURCE_1)) {
+        s->set_src(message[i]);
+        i++;
+    }
+    
+    if (s->get_metaheader(FLIP_LENGTH)) {
+        byte4_t = 0;
+        byte4_t = (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        s->set_len(byte4_t);
+    }
+    
+    if (s->get_metaheader(FLIP_CHECKSUM)) {
+        byte4_t = 0;
+        byte4_t = (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        s->set_checksum(byte4_t);
+    }
+    
+    if (s->get_metaheader(FLIP_FRAGOFFSET)) {
+        byte4_t = 0;
+        byte4_t = (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        s->set_offset(byte4_t);
+    }
+    
+    //return index pointing to buffer next byte (start of upper layer msg)
+    if (index == i)
+        return index;
+    else
+        return i - 1;
 }
 
 /* TEST FUNCTIONS */
@@ -567,14 +676,14 @@ void print_metaheader(FlipSocket s)
 
 void print_metafields(FlipSocket s)
 {
-    std::cout << "Ver: " <<   s.get_version();
-    std::cout << "\nDest:" << s.get_dest();
-    std::cout << "\nType:" << s.get_type();
-    std::cout << "\nTTL:" <<  s.get_ttl();
-    std::cout << "\nFlow:" << s.get_flow();
-    std::cout << "\nSrc:" <<  s.get_src();
-    std::cout << "\nLen:" <<  s.get_len();
-    std::cout << "\nCRC:" <<  s.get_checksum();
-    std::cout << "\nOffset:" << s.get_offset();
+    std::cout << std::dec << "Ver: " <<   (int) s.get_version();
+    std::cout << std::dec << "\nDest:" << (int) s.get_dest();
+    std::cout << std::dec << "\nType:" << (int) s.get_type();
+    std::cout << std::dec << "\nTTL:" <<  (int) s.get_ttl();
+    std::cout << std::dec << "\nFlow:" << (int) s.get_flow();
+    std::cout << std::dec << "\nSrc:" <<  (int) s.get_src();
+    std::cout << std::dec << "\nLen:" <<  (int) s.get_len();
+    std::cout << std::dec << "\nCRC:" <<  (int) s.get_checksum();
+    std::cout << std::dec << "\nOffset:" << (int) s.get_offset();
     std::cout << "\n";
 }

@@ -93,7 +93,6 @@ class FlipSocket {
 private:
     metaheader m_metaheader;
     metafields m_metafields;
-    //char *bitmap[4]{};
     
 public:
     //Constructors
@@ -119,19 +118,17 @@ public:
     void set_checksum(uint16_t checksum);
     void set_offset(uint16_t offset);
 
-    int get_version()   { return m_metafields.version; };
-    long get_dest()     { return m_metafields.dest_hst; };
-    int get_type()      { return m_metafields.type; };
-    int get_ttl()       { return m_metafields.ttl; };
-    int get_flow()      { return m_metafields.flow; };
-    long get_src()      { return m_metafields.src_hst; };
-    int get_len()       { return m_metafields.length; };
-    int get_checksum()  { return m_metafields.checksum; };
-    int get_offset()    { return m_metafields.offset; };
+    uint8_t get_version()   { return m_metafields.version; };
+    uint64_t get_dest()     { return m_metafields.dest_hst; };
+    uint8_t get_type()      { return m_metafields.type; };
+    uint8_t get_ttl()       { return m_metafields.ttl; };
+    uint32_t get_flow()      { return m_metafields.flow; };
+    uint64_t get_src()      { return m_metafields.src_hst; };
+    uint16_t get_len()       { return m_metafields.length; };
+    uint16_t get_checksum()  { return m_metafields.checksum; };
+    uint16_t get_offset()    { return m_metafields.offset; };
     
     void clear_metafields();
-    
-    //other, maybe private?
     void set_cont_bits();
     
 };
@@ -152,8 +149,8 @@ public:
     SocketHandler(){}
     
     //build bitmap and fields
-    void get_flip_metaheader(FlipSocket s);
-    void get_flip_metafields(FlipSocket s);
+    void build_metaheader(FlipSocket s);
+    void build_metafields(FlipSocket s);
     
     uint8_t* get_metafields() {return m_fields;};
     int get_fields_size() {return fields_size;};
@@ -162,7 +159,7 @@ public:
     int get_bitmap_size() {return bitmap_size;};
     
     int parse_flip_metaheader(FlipSocket *s, uint8_t *message, int m_size);
-    int parse_flip_metafields(FlipSocket s, uint8_t *message, int m_size);
+    int parse_flip_metafields(FlipSocket *s, uint8_t *message, int m_size, int index);
 };
 
 /* PUBLIC FUNCTIONS */
