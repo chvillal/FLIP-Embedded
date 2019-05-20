@@ -13,12 +13,14 @@
 void test_metaheader(void);
 void test_metafields(void);
 void test_buildandparse(void);
+void test_gtpsockets(void);
     
 int main(int argc, const char * argv[]) {
     
     //test_metaheader();
     //test_metafields();
-    test_buildandparse();
+    //test_buildandparse();
+    test_gtpsockets();
     
     return 0;
 }
@@ -96,10 +98,6 @@ void test_metafields(void)
     mysocket.set_len(16);
     mysocket.set_checksum(234);
     mysocket.set_offset(45);
-    
-//    uint8_t *a;
-//    mysocket.set_cont_bits();
-//    a = get_flip_metaheader(mysocket);
 
     uint8_t *m;
     handler.build_metafields(mysocket);
@@ -118,8 +116,6 @@ void test_metafields(void)
     }
     
     std::cout << "\n";
-    
-
 }
 
 void test_buildandparse(){
@@ -202,4 +198,41 @@ void test_buildandparse(){
     print_metafields(r_socket);
     std::cout << "\n";
     std::cout << "\n";
+}
+
+void test_gtpsockets(){
+    GTPsocket g_socket;
+    
+    g_socket.set_metabit(GTP_FLAGS, true);
+    g_socket.set_metabit(GTP_SOURCE, true);
+    g_socket.set_metabit(GTP_DEST, true);
+    g_socket.set_metabit(GTP_SEQ, true);
+    g_socket.set_metabit(GTP_ACK, true);
+    g_socket.set_metabit(GTP_TIMESTAMP, true);
+    g_socket.set_metabit(GTP_CHECKSUM, true);
+    g_socket.set_metabit(GTP_W_SIZE, true);
+//    g_socket.set_metabit(GTP_URGENT, true);
+//    g_socket.set_metabit(GTP_LENGTH, true);
+//    g_socket.set_metabit(GTP_NEXTPROTO, true);
+    
+    g_socket.set_flags(12);
+    g_socket.set_src(250);
+    g_socket.set_dest(234);
+    g_socket.set_seq(1234);
+    g_socket.set_ack(53);
+    g_socket.set_tstamp(92983);
+    g_socket.set_checksum(54089);
+    g_socket.set_wsize(1024);
+    g_socket.set_urgent(2048);
+    g_socket.set_len(234);
+    g_socket.set_nextp(4);
+    
+    g_socket.set_cont_bits();
+    
+    print_gtp_metaheader(g_socket);
+    std::cout << std::endl;
+    
+    print_gtp_metafields(g_socket);
+    std::cout << std::endl;
+    std::cout << std::endl;
 }

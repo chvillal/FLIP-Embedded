@@ -36,13 +36,27 @@
 #define FLIP_OPT5           0x000004
 #define FLIP_OPT6           0x000002
 #define FLIP_OPT7           0x000001
-
+#define GTP_FLAGS           0X4000
+#define GTP_SOURCE          0X2000
+#define GTP_DEST            0X1000
+#define GTP_SEQ             0X0800
+#define GTP_ACK             0X0400
+#define GTP_TIMESTAMP       0X0200
+#define GTP_CHECKSUM        0X0100
+#define GTP_W_SIZE          0X0040
+#define GTP_URGENT          0X0020
+#define GTP_LENGTH          0X0010
+#define GTP_NEXTPROTO       0X0008
+#define GTP_OPT1            0X0004
+#define GTP_OPT2            0X0002
+#define GTP_OPT3            0X0001
 #define FLIP_MAX_BITMAP_SIZE    3
 #define FLIP_MAX_FIELDS_SIZE    47
-
+#define GTP_MAX_BITMAP_SIZE     2
+#define GTP_MAX_FIELDS_SIZE     28
 
 /* STRUCTURES */
-struct metaheader
+struct flipbitmap
 {
     bool cont1;
     bool esp;
@@ -70,7 +84,7 @@ struct metaheader
     bool opt7;
 };
 
-struct metafields
+struct flipfields
 {
     uint8_t  version;
     uint64_t dest_hst;
@@ -85,14 +99,48 @@ struct metafields
     uint16_t offset;
 };
 
+struct gtpbitmap
+{
+    bool cont1;
+    bool flags;
+    bool src;
+    bool dest;
+    bool seq;
+    bool ack;
+    bool tstamp;
+    bool checksum;
+    bool cont2;
+    bool wsize;
+    bool urgent;
+    bool len;
+    bool nextp;
+    bool opt1;
+    bool opt2;
+    bool opt3;
+};
+
+struct gtpfields
+{
+    uint8_t flags;
+    uint16_t src;
+    uint16_t dest;
+    uint32_t seq;
+    uint32_t ack;
+    uint32_t tstamp;
+    uint16_t checksum;
+    uint32_t wsize;
+    uint16_t urgent;
+    uint16_t len;
+    uint8_t nextp;
+};
 /* CLASSES */
 
 // FLIPSOCKET CLASS stores all information relevant to a single Flip socket
 // provides cuntionality to set, get, and clear bits and corresponding fields
 class FlipSocket {
 private:
-    metaheader m_metaheader;
-    metafields m_metafields;
+    flipbitmap m_metaheader;
+    flipfields m_metafields;
     
 public:
     //Constructors
@@ -102,10 +150,11 @@ public:
         FlipSocket::clear_metafields();
     }
     
-    //metaheader bitmap bits
     void set_metaheader(int32_t bitmask, bool state);
     bool get_metaheader(uint32_t bitmask);
     void clear_metaheader();
+    void clear_metafields();
+    void set_cont_bits();
     
     //header field values
     void set_version(uint8_t ver);
@@ -122,19 +171,60 @@ public:
     uint64_t get_dest()     { return m_metafields.dest_hst; };
     uint8_t get_type()      { return m_metafields.type; };
     uint8_t get_ttl()       { return m_metafields.ttl; };
-    uint32_t get_flow()      { return m_metafields.flow; };
+    uint32_t get_flow()     { return m_metafields.flow; };
     uint64_t get_src()      { return m_metafields.src_hst; };
-    uint16_t get_len()       { return m_metafields.length; };
-    uint16_t get_checksum()  { return m_metafields.checksum; };
-    uint16_t get_offset()    { return m_metafields.offset; };
-    
-    void clear_metafields();
-    void set_cont_bits();
+    uint16_t get_len()      { return m_metafields.length; };
+    uint16_t get_checksum() { return m_metafields.checksum; };
+    uint16_t get_offset()   { return m_metafields.offset; };
     
 };
 
-// PACKET CLASS provides functionality to construct, and read
-// FLIPSOCKET packets.
+class GTPsocket {
+private:
+    gtpbitmap m_metaheader;
+    gtpfields m_metafields;
+    
+public:
+    //Constructor
+    GTPsocket()
+    {
+        clear_metafields();
+        clear_metaheader();
+    }
+    
+    void set_metabit(uint16_t bitmask, bool state);
+    bool get_metabit(uint16_t bitmask);
+    void clear_metaheader();
+    void clear_metafields();
+    void set_cont_bits();
+    
+    void set_flags(uint8_t flags) {m_metafields.flags = flags ;};
+    void set_src(uint16_t src) {m_metafields.src = src ;};
+    void set_dest(uint16_t dest) {m_metafields.dest = dest ;};
+    void set_seq(uint32_t seq) {m_metafields.seq = seq ;};
+    void set_ack(uint32_t ack) {m_metafields.ack = ack ;};
+    void set_tstamp(uint32_t tstamp) {m_metafields.tstamp = tstamp ;};
+    void set_checksum(uint16_t checksum) {m_metafields.checksum = checksum ;};
+    void set_wsize(uint32_t wsize) {m_metafields.wsize = wsize ;};
+    void set_urgent(uint16_t urgent) {m_metafields.urgent = urgent ;};
+    void set_len(uint16_t len) {m_metafields.len = len ;};
+    void set_nextp(uint8_t nextp) {m_metafields.nextp = nextp ;};
+    
+    uint8_t get_flags() {return m_metafields.flags ;};
+    uint16_t get_src() {return m_metafields.src ;};
+    uint16_t get_dest() {return m_metafields.dest ;};
+    uint32_t get_seq() {return m_metafields.seq ;};
+    uint32_t get_ack() {return m_metafields.ack ;};
+    uint32_t get_tstamp() {return m_metafields.tstamp ;};
+    uint16_t get_checksum() {return m_metafields.checksum ;};
+    uint32_t get_wsize() {return m_metafields.wsize ;};
+    uint16_t get_urgent() {return m_metafields.urgent ;};
+    uint16_t get_len() {return m_metafields.len ;};
+    uint8_t get_nextp() {return m_metafields.nextp ;};
+    
+};
+
+// PACKET CLASS provides functionality to construct, and read FLIPSOCKET packets.
 class SocketHandler {
 private:
     int bitmap_size;
@@ -148,7 +238,7 @@ public:
     //constructor
     SocketHandler(){}
     
-    //build bitmap and fields
+    //build FLIP bitmap and fields
     void build_metaheader(FlipSocket s);
     void build_metafields(FlipSocket s);
     
@@ -161,6 +251,8 @@ public:
     int parse_flip_metaheader(FlipSocket *s, uint8_t *message, int m_size);
     int parse_flip_metafields(FlipSocket *s, uint8_t *message, int m_size, int index);
 };
+
+
 
 /* PUBLIC FUNCTIONS */
 int setsocketopt();
@@ -175,7 +267,8 @@ int write();
 /* TEST FUNCTIONS */
 void print_metaheader(FlipSocket s);
 void print_metafields(FlipSocket s);
-
+void print_gtp_metaheader(GTPsocket g);
+void print_gtp_metafields(GTPsocket g);
 
 
 #endif /* eflip_h */

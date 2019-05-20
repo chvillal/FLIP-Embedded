@@ -18,6 +18,8 @@
 #define FLIP_CONT1      0x800000
 #define FLIP_CONT2      0x008000
 #define FLIP_CONT3      0x000080
+#define GTP_CONT1       0x8000
+#define GTP_CONT2       0x0080
 
 //#define BITMAP_MAXLEN   2
 //#define MAX_STR_SIZE    128 //temporary, not sure what max lora string len is...
@@ -105,11 +107,11 @@ void FlipSocket::set_metaheader(int32_t bitmask, bool state)
             break;
         case FLIP_DEST_1:
             m_metaheader.dest2 = state;
-            m_metaheader.dest1 = false;
+            //m_metaheader.dest1 = false;
             break;
         case FLIP_DEST_4:
             m_metaheader.dest1 = state;
-            m_metaheader.dest2 = false;
+            //m_metaheader.dest2 = false;
             break;
         case FLIP_DEST_16:
             m_metaheader.dest1 = state;
@@ -126,11 +128,11 @@ void FlipSocket::set_metaheader(int32_t bitmask, bool state)
             break;
         case FLIP_SOURCE_1:
             m_metaheader.source2 = state;
-            m_metaheader.source1 = false;
+            //m_metaheader.source1 = false;
             break;
         case FLIP_SOURCE_4:
             m_metaheader.source1 = state;
-            m_metaheader.source2 = false;
+            //m_metaheader.source2 = false;
             break;
         case FLIP_SOURCE_16:
             m_metaheader.source1 = state;
@@ -312,6 +314,154 @@ void FlipSocket::set_cont_bits()
     
     //redundant under current version, but set for sanity.
     m_metaheader.cont3 = false;
+}
+
+void GTPsocket::set_metabit(uint16_t bitmask, bool state)
+{
+    switch (bitmask)
+    {
+        case GTP_CONT1:
+            m_metaheader.cont1 = state;
+            break;
+        case GTP_FLAGS:
+            m_metaheader.flags = state;
+            break;
+        case GTP_SOURCE:
+            m_metaheader.src = state;
+            break;
+        case GTP_DEST:
+            m_metaheader.dest = state;
+            break;
+        case GTP_SEQ:
+            m_metaheader.seq = state;
+            break;
+        case GTP_ACK:
+            m_metaheader.ack = state;
+            break;
+        case GTP_TIMESTAMP:
+            m_metaheader.tstamp = state;
+            break;
+        case GTP_CHECKSUM:
+            m_metaheader.checksum = state;
+            break;
+        case GTP_CONT2:
+            m_metaheader.cont2 = state;
+            break;
+        case GTP_W_SIZE:
+            m_metaheader.wsize = state;
+            break;
+        case GTP_URGENT:
+            m_metaheader.urgent = state;
+            break;
+        case GTP_LENGTH:
+            m_metaheader.len = state;
+            break;
+        case GTP_NEXTPROTO:
+            m_metaheader.nextp = state;
+            break;
+        case GTP_OPT1:
+            m_metaheader.opt1 = state;
+            break;
+        case GTP_OPT2:
+            m_metaheader.opt2 = state;
+            break;
+        case GTP_OPT3:
+            m_metaheader.opt3 = state;
+            break;
+        default:
+            break;
+    }
+}
+
+bool GTPsocket::get_metabit(uint16_t bitmask)
+{
+    switch (bitmask)
+    {
+        case GTP_CONT1:
+            return m_metaheader.cont1;
+        case GTP_FLAGS:
+            return m_metaheader.flags;
+        case GTP_SOURCE:
+            return m_metaheader.src;
+        case GTP_DEST:
+            return m_metaheader.dest;
+        case GTP_SEQ:
+            return m_metaheader.seq;
+        case GTP_ACK:
+            return m_metaheader.ack;
+        case GTP_TIMESTAMP:
+            return m_metaheader.tstamp;
+        case GTP_CHECKSUM:
+            return m_metaheader.checksum;
+        case GTP_CONT2:
+            return m_metaheader.cont2;
+        case GTP_W_SIZE:
+            return m_metaheader.wsize;
+        case GTP_URGENT:
+            return m_metaheader.urgent;
+        case GTP_LENGTH:
+            return m_metaheader.len;
+        case GTP_NEXTPROTO:
+            return m_metaheader.nextp;
+        case GTP_OPT1:
+            return m_metaheader.opt1;
+        case GTP_OPT2:
+            return m_metaheader.opt2;
+        case GTP_OPT3:
+            return m_metaheader.opt3;
+        default:
+            break;
+    }
+    
+    //if it gets here, error
+    return false;
+}
+
+void GTPsocket::clear_metaheader()
+{
+    m_metaheader.flags = false;
+    m_metaheader.src = false;
+    m_metaheader.dest = false;
+    m_metaheader.seq = false;
+    m_metaheader.ack = false;
+    m_metaheader.tstamp = false;
+    m_metaheader.checksum = false;
+    m_metaheader.wsize = false;
+    m_metaheader.urgent = false;
+    m_metaheader.len = false;
+    m_metaheader.nextp = false;
+    m_metaheader.opt1 = false;
+    m_metaheader.opt2 = false;
+    m_metaheader.opt3 = false;
+}
+
+void GTPsocket::clear_metafields()
+{
+    m_metafields.flags = 0;
+    m_metafields.src = 0;
+    m_metafields.dest = 0;
+    m_metafields.seq = 0;
+    m_metafields.ack = 0;
+    m_metafields.tstamp = 0;
+    m_metafields.checksum = 0;
+    m_metafields.wsize = 0;
+    m_metafields.urgent = 0;
+    m_metafields.len = 0;
+    m_metafields.nextp = 0;
+}
+
+void GTPsocket::set_cont_bits()
+{
+    if ( m_metaheader.wsize || m_metaheader.urgent || m_metaheader.len || m_metaheader.nextp ||
+         m_metaheader.opt1 || m_metaheader.opt2 || m_metaheader.opt3 )
+    {
+        m_metaheader.cont1 = true;
+    } else {
+        m_metaheader.cont1 = false;
+    }
+    
+    // additional metaheader bystes pending, limited to 2 bytes for now.
+    m_metaheader.cont2 = false;
 }
 
 /* HELPER FUNCTIONS */
@@ -644,7 +794,7 @@ int SocketHandler::parse_flip_metafields(FlipSocket *s, uint8_t *message, int m_
         return i - 1;
 }
 
-/* TEST FUNCTIONS */
+/* TEST/PRINT FUNCTIONS */
 void print_metaheader(FlipSocket s)
 {
     std::cout << "cont1: " << s.get_metaheader(FLIP_CONT1) ;
@@ -686,4 +836,36 @@ void print_metafields(FlipSocket s)
     std::cout << std::dec << "\nCRC:" <<  (int) s.get_checksum();
     std::cout << std::dec << "\nOffset:" << (int) s.get_offset();
     std::cout << "\n";
+}
+
+void print_gtp_metaheader(GTPsocket g)
+{
+    std::cout << "\ncont1: " << g.get_metabit(GTP_CONT1);
+    std::cout << "\nflags: " << g.get_metabit(GTP_FLAGS);
+    std::cout << "\nsrc: " << g.get_metabit(GTP_SOURCE);
+    std::cout << "\ndest: " << g.get_metabit(GTP_DEST);
+    std::cout << "\nseq#: " << g.get_metabit(GTP_SEQ);
+    std::cout << "\nack: " << g.get_metabit(GTP_ACK);
+    std::cout << "\ntstmp: " << g.get_metabit(GTP_TIMESTAMP);
+    std::cout << "\nchksum: " << g.get_metabit(GTP_CHECKSUM);
+    std::cout << "\ncont2: " << g.get_metabit(GTP_CONT2);
+    std::cout << "\nwsize: " << g.get_metabit(GTP_W_SIZE);
+    std::cout << "\nurgent: " << g.get_metabit(GTP_URGENT);
+    std::cout << "\nlen: " << g.get_metabit(GTP_LENGTH);
+    std::cout << "\nnextp: " << g.get_metabit(GTP_NEXTPROTO);
+}
+
+void print_gtp_metafields(GTPsocket g)
+{
+    std::cout << std::dec << "\nflags: " <<   (int) g.get_flags() ;
+    std::cout << std::dec << "\nsrc: " <<   (int) g.get_src() ;
+    std::cout << std::dec << "\ndest: " <<   (int) g.get_dest() ;
+    std::cout << std::dec << "\nseq: " <<   (int) g.get_seq() ;
+    std::cout << std::dec << "\nack: " <<   (int) g.get_ack() ;
+    std::cout << std::dec << "\ntstamp: " <<   (int) g.get_tstamp() ;
+    std::cout << std::dec << "\nchecksum: " <<   (int) g.get_checksum() ;
+    std::cout << std::dec << "\nwsize: " <<   (int) g.get_wsize() ;
+    std::cout << std::dec << "\nurgent: " <<   (int) g.get_urgent() ;
+    std::cout << std::dec << "\nlen: " <<   (int) g.get_len() ;
+    std::cout << std::dec << "\nnextp: " <<   (int) g.get_nextp() ;
 }
