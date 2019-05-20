@@ -231,8 +231,10 @@ private:
     int fields_size;
     uint8_t m_bitmap[FLIP_MAX_BITMAP_SIZE+1]{};
     uint8_t m_fields[FLIP_MAX_FIELDS_SIZE+1]{};
-    //FlipSocket socket;
-    //bool modified;
+    int g_bitmap_size;
+    int g_fields_size;
+    uint8_t g_bitmap[GTP_MAX_BITMAP_SIZE+1]{};
+    uint8_t g_fields[GTP_MAX_FIELDS_SIZE+1]{};
     
 public:
     //constructor
@@ -241,15 +243,25 @@ public:
     //build FLIP bitmap and fields
     void build_metaheader(FlipSocket s);
     void build_metafields(FlipSocket s);
-    
-    uint8_t* get_metafields() {return m_fields;};
-    int get_fields_size() {return fields_size;};
-    
-    uint8_t* get_bitmap() {return m_bitmap;};
-    int get_bitmap_size() {return bitmap_size;};
-    
     int parse_flip_metaheader(FlipSocket *s, uint8_t *message, int m_size);
     int parse_flip_metafields(FlipSocket *s, uint8_t *message, int m_size, int index);
+    
+    uint8_t* get_metafields() {return m_fields;};
+    uint8_t* get_bitmap() {return m_bitmap;};
+    int get_fields_size() {return fields_size;};
+    int get_bitmap_size() {return bitmap_size;};
+
+    //build GTP bitmap and fields
+    void build_gtp_metaheader(GTPsocket g);
+    void build_gtp_metafields(GTPsocket g);
+    int parse_gtp_metaheader(GTPsocket g, uint8_t *message, int m_size);
+    int parse_gtp_metafields(GTPsocket g, uint8_t *message, int m_size, int index);
+    
+    uint8_t* get_gtp_metafields() {return g_fields;};
+    uint8_t* get_gtp_bitmap() {return g_bitmap;};
+    int get_gtp_fieldsize() {return g_fields_size;};
+    int get_gtp_bitmapsize() {return g_bitmap_size;};
+    
 };
 
 

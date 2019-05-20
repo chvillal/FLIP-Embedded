@@ -794,6 +794,27 @@ int SocketHandler::parse_flip_metafields(FlipSocket *s, uint8_t *message, int m_
         return i - 1;
 }
 
+void SocketHandler::build_gtp_metaheader(GTPsocket g)
+{
+    
+}
+
+void SocketHandler::build_gtp_metafields(GTPsocket g)
+{
+    
+}
+
+int SocketHandler::parse_gtp_metaheader(GTPsocket g, uint8_t *message, int m_size)
+{
+    return 0;
+}
+
+int SocketHandler::parse_gtp_metafields(GTPsocket g, uint8_t *message, int m_size, int index)
+{
+    return 0;
+}
+
+
 /* TEST/PRINT FUNCTIONS */
 void print_metaheader(FlipSocket s)
 {
