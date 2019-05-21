@@ -202,6 +202,10 @@ void test_buildandparse(){
 
 void test_gtpsockets(){
     GTPsocket g_socket;
+    SocketHandler handler;
+    uint8_t *bitmap;
+    uint8_t *fields;
+    int size;
     
     g_socket.set_metabit(GTP_FLAGS, true);
     g_socket.set_metabit(GTP_SOURCE, true);
@@ -211,9 +215,9 @@ void test_gtpsockets(){
     g_socket.set_metabit(GTP_TIMESTAMP, true);
     g_socket.set_metabit(GTP_CHECKSUM, true);
     g_socket.set_metabit(GTP_W_SIZE, true);
-//    g_socket.set_metabit(GTP_URGENT, true);
-//    g_socket.set_metabit(GTP_LENGTH, true);
-//    g_socket.set_metabit(GTP_NEXTPROTO, true);
+    g_socket.set_metabit(GTP_URGENT, true);
+    g_socket.set_metabit(GTP_LENGTH, true);
+    g_socket.set_metabit(GTP_NEXTPROTO, true);
     
     g_socket.set_flags(12);
     g_socket.set_src(250);
@@ -231,8 +235,54 @@ void test_gtpsockets(){
     
     print_gtp_metaheader(g_socket);
     std::cout << std::endl;
+    std::cout << std::endl;
+    
+    handler.build_gtp_metaheader(g_socket);
+    bitmap = handler.get_gtp_bitmap();
+    size = handler.get_gtp_bitmapsize();
+    
+    std::cout << "bitmapSize= " << size << std::endl;
+    for (int i=0; i < size; i++ ){
+        std::cout << std::hex << (int) *(bitmap+i) << " ";
+    }
+    std::cout << "\n";
+    for (int i=0; i < size; i++ ){
+        std::cout << std::bitset<8> (*(bitmap+i)) << " " ;
+    }
+    std::cout << std::endl;
+    std::cout << std::endl;
+    
+    GTPsocket rcv_s;
+    SocketHandler rcv_h;
+    
+    rcv_h.parse_gtp_metaheader(&rcv_s, bitmap, size);
+    print_gtp_metaheader(rcv_s);
+    std::cout << std::endl;
+    std::cout << std::endl;
+    
+    //build metafields
+    handler.build_gtp_metafields(g_socket);
+    fields = handler.get_gtp_metafields();
+    size = handler.get_gtp_fieldsize();
     
     print_gtp_metafields(g_socket);
+    std::cout << std::endl;
+    std::cout << std::endl;
+    
+    std::cout << "fields-size= " << size << std::endl;
+    for (int i=0; i<=size; i++ ){
+        std::cout << std::hex << (int) *(fields+i) << " ";
+    }
+    std::cout << std::endl;
+    std::cout << std::endl;
+    for (int i=0; i<=size; i++ ){
+        std::cout << std::bitset<8> (*(fields+i)) << " " ;
+    }
+    std::cout << std::endl;
+    std::cout << std::endl;
+    
+    rcv_h.parse_gtp_metafields(&rcv_s, fields, size, 0);
+    print_gtp_metafields(rcv_s);
     std::cout << std::endl;
     std::cout << std::endl;
 }

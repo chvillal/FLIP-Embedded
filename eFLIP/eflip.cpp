@@ -8,9 +8,9 @@
 
 /* LIBRARIES */
 #include "eflip.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
 #include <iostream>
 
 
@@ -268,28 +268,6 @@ void FlipSocket::clear_metaheader()
     m_metaheader.opt7 = false;
 }
 
-
-/* WRAPPER FUNCTIONS */
-int setsocketopt()
-{
-    return 0;
-}
-
-int getsocketopt()
-{
-    return 0;
-}
-
-int read()
-{
-    return 0;
-}
-
-int write()
-{
-    return 0;
-}
-
 void FlipSocket::set_cont_bits()
 {
     
@@ -463,8 +441,6 @@ void GTPsocket::set_cont_bits()
     // additional metaheader bystes pending, limited to 2 bytes for now.
     m_metaheader.cont2 = false;
 }
-
-/* HELPER FUNCTIONS */
 
 void SocketHandler::build_metaheader(FlipSocket s)
 {
@@ -796,20 +772,319 @@ int SocketHandler::parse_flip_metafields(FlipSocket *s, uint8_t *message, int m_
 
 void SocketHandler::build_gtp_metaheader(GTPsocket g)
 {
+    //set cont bits first
+    g.set_cont_bits();
     
+    //insert continuation bits first
+    g.get_metabit(GTP_CONT1) ? g_bitmap[0] = g_bitmap[0] | (GTP_CONT1 >> 8) : g_bitmap[0] = g_bitmap[0] & (~GTP_CONT1  >> 8);
+    g.get_metabit(GTP_CONT2) ? g_bitmap[1] = g_bitmap[1] | (GTP_CONT2) : g_bitmap[1] = g_bitmap[1] & (~GTP_CONT2);
+    
+    //build byte0
+    g.get_metabit(GTP_FLAGS) ? g_bitmap[0] = g_bitmap[0] | (GTP_FLAGS >> 8) : g_bitmap[0] = g_bitmap[0] & (~GTP_FLAGS  >> 8);
+    g.get_metabit(GTP_SOURCE) ? g_bitmap[0] = g_bitmap[0] | (GTP_SOURCE >> 8) : g_bitmap[0] = g_bitmap[0] & (~GTP_SOURCE  >> 8);
+    g.get_metabit(GTP_DEST) ? g_bitmap[0] = g_bitmap[0] | (GTP_DEST >> 8) : g_bitmap[0] = g_bitmap[0] & (~GTP_DEST  >> 8);
+    g.get_metabit(GTP_SEQ) ? g_bitmap[0] = g_bitmap[0] | (GTP_SEQ >> 8) : g_bitmap[0] = g_bitmap[0] & (~GTP_SEQ  >> 8);
+    g.get_metabit(GTP_ACK) ? g_bitmap[0] = g_bitmap[0] | (GTP_ACK >> 8) : g_bitmap[0] = g_bitmap[0] & (~GTP_ACK  >> 8);
+    g.get_metabit(GTP_TIMESTAMP) ? g_bitmap[0] = g_bitmap[0] | (GTP_TIMESTAMP >> 8) : g_bitmap[0] = g_bitmap[0] & (~GTP_TIMESTAMP >> 8);
+    g.get_metabit(GTP_CHECKSUM) ? g_bitmap[0] = g_bitmap[0] | (GTP_CHECKSUM >> 8) : g_bitmap[0] = g_bitmap[0] & (~GTP_CHECKSUM  >> 8);
+    
+    if (g.get_metabit(GTP_CONT1) == false)
+    {
+        g_bitmap_size = 1;
+        return;
+    }
+    
+    //build byte1
+    g.get_metabit(GTP_W_SIZE) ? g_bitmap[1] = g_bitmap[1] | GTP_W_SIZE  : g_bitmap[1] = g_bitmap[1] & ~GTP_W_SIZE;
+    g.get_metabit(GTP_URGENT) ? g_bitmap[1] = g_bitmap[1] | GTP_URGENT  : g_bitmap[1] = g_bitmap[1] & ~GTP_URGENT;
+    g.get_metabit(GTP_LENGTH) ? g_bitmap[1] = g_bitmap[1] | GTP_LENGTH  : g_bitmap[1] = g_bitmap[1] & ~GTP_LENGTH;
+    g.get_metabit(GTP_NEXTPROTO) ? g_bitmap[1] = g_bitmap[1] | GTP_NEXTPROTO  : g_bitmap[1] = g_bitmap[1] & ~GTP_NEXTPROTO;
+    g.get_metabit(GTP_OPT1) ? g_bitmap[1] = g_bitmap[1] | GTP_OPT1  : g_bitmap[1] = g_bitmap[1] & ~GTP_OPT1;
+    g.get_metabit(GTP_OPT2) ? g_bitmap[1] = g_bitmap[1] | GTP_OPT2  : g_bitmap[1] = g_bitmap[1] & ~GTP_OPT2;
+    g.get_metabit(GTP_OPT3) ? g_bitmap[1] = g_bitmap[1] | GTP_OPT3  : g_bitmap[1] = g_bitmap[1] & ~GTP_OPT3;
+    
+    g_bitmap_size = 2;
+    return;
 }
 
 void SocketHandler::build_gtp_metafields(GTPsocket g)
 {
+    int index = 0;
+    
+    if (g.get_metabit(GTP_FLAGS)){
+        g_fields[index] = g.get_flags();
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_SOURCE)){
+        g_fields[index] = (g.get_src() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_src() & 0xFF);
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_DEST)){
+        g_fields[index] = (g.get_dest() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_dest() & 0xFF);
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_SEQ)){
+        g_fields[index] = (g.get_seq() & 0xFF000000) >> 24;
+        index++;
+        g_fields[index] = (g.get_seq() & 0xFF0000) >> 16;
+        index++;
+        g_fields[index] = (g.get_seq() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_seq() & 0xFF);
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_ACK)){
+        g_fields[index] = (g.get_ack() & 0xFF000000) >> 24;
+        index++;
+        g_fields[index] = (g.get_ack() & 0xFF0000) >> 16;
+        index++;
+        g_fields[index] = (g.get_ack() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_ack() & 0xFF);
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_TIMESTAMP)){
+        g_fields[index] = (g.get_tstamp() & 0xFF000000) >> 24;
+        index++;
+        g_fields[index] = (g.get_tstamp() & 0xFF0000) >> 16;
+        index++;
+        g_fields[index] = (g.get_tstamp() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_tstamp() & 0xFF);
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_CHECKSUM)){
+        g_fields[index] = (g.get_checksum() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_checksum() & 0xFF);
+        index++;
+    }
+
+    if (g.get_metabit(GTP_W_SIZE)){
+        g_fields[index] = (g.get_wsize() & 0xFF000000) >> 24;
+        index++;
+        g_fields[index] = (g.get_wsize() & 0xFF0000) >> 16;
+        index++;
+        g_fields[index] = (g.get_wsize() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_wsize() & 0xFF);
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_URGENT)){
+        g_fields[index] = (g.get_urgent() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_urgent() & 0xFF);
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_LENGTH)){
+        g_fields[index] = (g.get_len() & 0xFF00) >> 8;
+        index++;
+        g_fields[index] = (g.get_len() & 0xFF);
+        index++;
+    }
+    
+    if (g.get_metabit(GTP_NEXTPROTO)){
+        g_fields[index] = g.get_nextp();
+        index++;
+    }
+    
+    if (index !=0)
+        g_fields_size = index-1;
     
 }
 
-int SocketHandler::parse_gtp_metaheader(GTPsocket g, uint8_t *message, int m_size)
+int SocketHandler::parse_gtp_metaheader(GTPsocket *g, uint8_t *message, int m_size)
+{
+    int i = 0;
+    if (m_size < 1) {return 0;};
+    
+    // check if larger than 1 byte bitmap
+    (message[i] & (GTP_CONT1 >> 8))   ? g->set_metabit(GTP_CONT1 , true)  : g->set_metabit(GTP_CONT1 , false);
+    (message[i] & (GTP_FLAGS >> 8))   ? g->set_metabit(GTP_FLAGS , true)  : g->set_metabit(GTP_FLAGS , false);
+    (message[i] & (GTP_SOURCE >> 8))   ? g->set_metabit(GTP_SOURCE , true)  : g->set_metabit(GTP_SOURCE , false);
+    (message[i] & (GTP_DEST >> 8))   ? g->set_metabit(GTP_DEST , true)  : g->set_metabit(GTP_DEST , false);
+    (message[i] & (GTP_SEQ >> 8))   ? g->set_metabit(GTP_SEQ , true)  : g->set_metabit(GTP_SEQ , false);
+    (message[i] & (GTP_ACK >> 8))   ? g->set_metabit(GTP_ACK , true)  : g->set_metabit(GTP_ACK , false);
+    (message[i] & (GTP_TIMESTAMP >> 8))   ? g->set_metabit(GTP_TIMESTAMP , true)  : g->set_metabit(GTP_TIMESTAMP , false);
+    (message[i] & (GTP_CHECKSUM >> 8))   ? g->set_metabit(GTP_CHECKSUM , true)  : g->set_metabit(GTP_CHECKSUM , false);
+    i++;
+    
+    if (g->get_metabit(GTP_CONT1) ==  false){
+        return i;
+    }
+    
+    (message[i] & GTP_CONT2)   ? g->set_metabit(GTP_CONT2 , true)  : g->set_metabit(GTP_CONT2 , false);
+    (message[i] & GTP_W_SIZE)   ? g->set_metabit(GTP_W_SIZE , true)  : g->set_metabit(GTP_W_SIZE , false);
+    (message[i] & GTP_URGENT)   ? g->set_metabit(GTP_URGENT , true)  : g->set_metabit(GTP_URGENT , false);
+    (message[i] & GTP_LENGTH)   ? g->set_metabit(GTP_LENGTH , true)  : g->set_metabit(GTP_LENGTH , false);
+    (message[i] & GTP_NEXTPROTO)   ? g->set_metabit(GTP_NEXTPROTO , true)  : g->set_metabit(GTP_NEXTPROTO , false);
+    (message[i] & GTP_OPT1)   ? g->set_metabit(GTP_OPT1 , true)  : g->set_metabit(GTP_OPT1 , false);
+    (message[i] & GTP_OPT2)   ? g->set_metabit(GTP_OPT2 , true)  : g->set_metabit(GTP_OPT2 , false);
+    (message[i] & GTP_OPT3)   ? g->set_metabit(GTP_OPT3 , true)  : g->set_metabit(GTP_OPT3 , false);
+    i++;
+    
+    return i;
+}
+
+int SocketHandler::parse_gtp_metafields(GTPsocket *g, uint8_t *message, int m_size, int index)
+{
+    int i = index;
+    uint32_t byte4_t;
+    
+    g->clear_metafields();
+    
+    if (g->get_metabit(GTP_FLAGS)) {
+        g->set_flags(message[i]);
+        i++;
+    }
+    
+    if (g->get_metabit(GTP_SOURCE)) {
+        byte4_t = 0;
+        byte4_t = (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_src(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_DEST)) {
+        byte4_t = 0;
+        byte4_t = (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_dest(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_SEQ)) {
+        byte4_t = 0;
+        byte4_t = message[i] << 24;
+        i++;
+        byte4_t = byte4_t | (message[i] << 16);
+        i++;
+        byte4_t = byte4_t | (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_seq(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_ACK)) {
+        byte4_t = 0;
+        byte4_t = message[i] << 24;
+        i++;
+        byte4_t = byte4_t | (message[i] << 16);
+        i++;
+        byte4_t = byte4_t | (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_ack(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_TIMESTAMP)) {
+        byte4_t = 0;
+        byte4_t = message[i] << 24;
+        i++;
+        byte4_t = byte4_t | (message[i] << 16);
+        i++;
+        byte4_t = byte4_t | (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_tstamp(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_CHECKSUM)) {
+        byte4_t = 0;
+        byte4_t = (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_checksum(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_W_SIZE)) {
+        byte4_t = 0;
+        byte4_t = message[i] << 24;
+        i++;
+        byte4_t = byte4_t | (message[i] << 16);
+        i++;
+        byte4_t = byte4_t | (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_wsize(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_URGENT)) {
+        byte4_t = 0;
+        byte4_t = (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_urgent(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_LENGTH)) {
+        byte4_t = 0;
+        byte4_t = (message[i] << 8);
+        i++;
+        byte4_t = byte4_t | message[i];
+        i++;
+        
+        g->set_len(byte4_t);
+    }
+    
+    if (g->get_metabit(GTP_NEXTPROTO)) {
+        g->set_nextp(message[i]);
+        i++;
+    }
+    
+    if (index == i)
+        return index;
+    else
+        return i - 1;
+}
+
+
+/* WRAPPER FUNCTIONS */
+int setsocketopt()
 {
     return 0;
 }
 
-int SocketHandler::parse_gtp_metafields(GTPsocket g, uint8_t *message, int m_size, int index)
+int getsocketopt()
+{
+    return 0;
+}
+
+int read()
+{
+    return 0;
+}
+
+int write()
 {
     return 0;
 }

@@ -254,8 +254,8 @@ public:
     //build GTP bitmap and fields
     void build_gtp_metaheader(GTPsocket g);
     void build_gtp_metafields(GTPsocket g);
-    int parse_gtp_metaheader(GTPsocket g, uint8_t *message, int m_size);
-    int parse_gtp_metafields(GTPsocket g, uint8_t *message, int m_size, int index);
+    int parse_gtp_metaheader(GTPsocket *g, uint8_t *message, int m_size);
+    int parse_gtp_metafields(GTPsocket *g, uint8_t *message, int m_size, int index);
     
     uint8_t* get_gtp_metafields() {return g_fields;};
     uint8_t* get_gtp_bitmap() {return g_bitmap;};
@@ -263,8 +263,6 @@ public:
     int get_gtp_bitmapsize() {return g_bitmap_size;};
     
 };
-
-
 
 /* PUBLIC FUNCTIONS */
 int setsocketopt();
