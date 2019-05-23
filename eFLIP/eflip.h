@@ -154,7 +154,7 @@ public:
     }
     
     void set_metabit(int32_t bitmask, bool state);
-    bool get_metaheader(uint32_t bitmask);
+    bool get_metabit(uint32_t bitmask);
     void clear_metaheader();
     void clear_metafields();
     void set_cont_bits();

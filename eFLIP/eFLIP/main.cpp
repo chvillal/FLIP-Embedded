@@ -32,17 +32,17 @@ void test_metaheader(void)
     
     //print_metaheader(mysocket);
     std::cout << "\n\n";
-    mysocket.set_metaheader(FLIP_ESP, true);
-    mysocket.set_metaheader(FLIP_VERSION, true);
-    mysocket.set_metaheader(FLIP_DEST_1, true);
-    mysocket.set_metaheader(FLIP_TYPE, true);
-    mysocket.set_metaheader(FLIP_TTL, true);
-    mysocket.set_metaheader(FLIP_FLOW, true );
-    mysocket.set_metaheader(FLIP_SOURCE_1, true );
-    mysocket.set_metaheader(FLIP_LENGTH, true );
-    mysocket.set_metaheader(FLIP_CHECKSUM, true );
-    mysocket.set_metaheader(FLIP_NOFRAG, true );
-    mysocket.set_metaheader(FLIP_LASTFRAG, true );
+    mysocket.set_metabit(FLIP_ESP, true);
+    mysocket.set_metabit(FLIP_VERSION, true);
+    mysocket.set_metabit(FLIP_DEST_1, true);
+    mysocket.set_metabit(FLIP_TYPE, true);
+    mysocket.set_metabit(FLIP_TTL, true);
+    mysocket.set_metabit(FLIP_FLOW, true );
+    mysocket.set_metabit(FLIP_SOURCE_1, true );
+    mysocket.set_metabit(FLIP_LENGTH, true );
+    mysocket.set_metabit(FLIP_CHECKSUM, true );
+    mysocket.set_metabit(FLIP_NOFRAG, true );
+    mysocket.set_metabit(FLIP_LASTFRAG, true );
 
     uint8_t *a;
     handler.build_metaheader(mysocket);
@@ -77,17 +77,17 @@ void test_metafields(void)
     FlipSocket mysocket;
     SocketHandler handler;
     
-//    mysocket.set_metaheader(FLIP_ESP, false);
-    mysocket.set_metaheader(FLIP_VERSION, true);
-    mysocket.set_metaheader(FLIP_DEST_1, true);
-    mysocket.set_metaheader(FLIP_TYPE, true);
-    mysocket.set_metaheader(FLIP_TTL, true);
-    mysocket.set_metaheader(FLIP_FLOW, true );
-    mysocket.set_metaheader(FLIP_SOURCE_1, true );
-    mysocket.set_metaheader(FLIP_LENGTH, true );
-    mysocket.set_metaheader(FLIP_CHECKSUM, true );
-//    mysocket.set_metaheader(FLIP_NOFRAG, true );
-    mysocket.set_metaheader(FLIP_LASTFRAG, true );
+//    mysocket.set_metabit(FLIP_ESP, false);
+    mysocket.set_metabit(FLIP_VERSION, true);
+    mysocket.set_metabit(FLIP_DEST_1, true);
+    mysocket.set_metabit(FLIP_TYPE, true);
+    mysocket.set_metabit(FLIP_TTL, true);
+    mysocket.set_metabit(FLIP_FLOW, true );
+    mysocket.set_metabit(FLIP_SOURCE_1, true );
+    mysocket.set_metabit(FLIP_LENGTH, true );
+    mysocket.set_metabit(FLIP_CHECKSUM, true );
+//    mysocket.set_metabit(FLIP_NOFRAG, true );
+    mysocket.set_metabit(FLIP_LASTFRAG, true );
     
     mysocket.set_version(1);
     mysocket.set_dest(128);
@@ -127,18 +127,18 @@ void test_buildandparse(){
     int f_size;
     
     //cnfigure flip socket
-    //s_socket.set_metaheader(FLIP_ESP, true);
-    s_socket.set_metaheader(FLIP_VERSION, true);
-    s_socket.set_metaheader(FLIP_DEST_4, true);
-    s_socket.set_metaheader(FLIP_TYPE, true);
-    s_socket.set_metaheader(FLIP_TTL, true);
-    s_socket.set_metaheader(FLIP_FLOW, true );
-    s_socket.set_metaheader(FLIP_SOURCE_4, true );
-    s_socket.set_metaheader(FLIP_LENGTH, true );
-    s_socket.set_metaheader(FLIP_CHECKSUM, true );
-    s_socket.set_metaheader(FLIP_NOFRAG, true );
-    s_socket.set_metaheader(FLIP_LASTFRAG, true );
-    s_socket.set_metaheader(FLIP_FRAGOFFSET, true);
+    //s_socket.set_metabit(FLIP_ESP, true);
+    s_socket.set_metabit(FLIP_VERSION, true);
+    s_socket.set_metabit(FLIP_DEST_4, true);
+    s_socket.set_metabit(FLIP_TYPE, true);
+    s_socket.set_metabit(FLIP_TTL, true);
+    s_socket.set_metabit(FLIP_FLOW, true );
+    s_socket.set_metabit(FLIP_SOURCE_4, true );
+    s_socket.set_metabit(FLIP_LENGTH, true );
+    s_socket.set_metabit(FLIP_CHECKSUM, true );
+    s_socket.set_metabit(FLIP_NOFRAG, true );
+    s_socket.set_metabit(FLIP_LASTFRAG, true );
+    s_socket.set_metabit(FLIP_FRAGOFFSET, true);
     
     s_socket.set_version(255);
     s_socket.set_dest(65535);
