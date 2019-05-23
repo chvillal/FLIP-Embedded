@@ -252,11 +252,11 @@ void test_gtpsockets(){
     std::cout << std::endl;
     std::cout << std::endl;
     
-    GTPsocket rcv_s;
+    //GTPsocket rcv_s;
     SocketHandler rcv_h;
     
-    rcv_h.parse_gtp_metaheader(&rcv_s, bitmap, size);
-    print_gtp_metaheader(rcv_s);
+    rcv_h.parse_gtp_metaheader(&rcv_h.gtp_s, bitmap, size);
+    print_gtp_metaheader(rcv_h.gtp_s);
     std::cout << std::endl;
     std::cout << std::endl;
     
@@ -281,8 +281,15 @@ void test_gtpsockets(){
     std::cout << std::endl;
     std::cout << std::endl;
     
-    rcv_h.parse_gtp_metafields(&rcv_s, fields, size, 0);
-    print_gtp_metafields(rcv_s);
+    rcv_h.parse_gtp_metafields(&rcv_h.gtp_s, fields, size, 0);
+    print_gtp_metafields(rcv_h.gtp_s);
+    std::cout << std::endl;
+    std::cout << std::endl;
+    
+    //test sizes
+    std::cout << "GTPsize =" << sizeof(rcv_h.gtp_s) << "\n";
+    std::cout << "FLIPsize =" << sizeof(rcv_h.flip_s) << "\n";
+    std::cout << "Handersize =" << sizeof(rcv_h) << "\n";
     std::cout << std::endl;
     std::cout << std::endl;
 }

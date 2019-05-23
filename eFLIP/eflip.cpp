@@ -13,7 +13,6 @@
 //#include <string.h>
 #include <iostream>
 
-
 /* DEFINES */
 #define FLIP_CONT1      0x800000
 #define FLIP_CONT2      0x008000
@@ -21,55 +20,8 @@
 #define GTP_CONT1       0x8000
 #define GTP_CONT2       0x0080
 
-//#define BITMAP_MAXLEN   2
-//#define MAX_STR_SIZE    128 //temporary, not sure what max lora string len is...
-
-
+#define MAX_SOCK_COUNT  2
 /* CLASS FUNCTIONS */
-void FlipSocket::set_version(uint8_t ver)
-{
-    m_metafields.version = ver;
-}
-
-void FlipSocket::set_dest(uint64_t dest)
-{
-    m_metafields.dest_hst = dest;
-}
-
-void FlipSocket::set_type(uint8_t type)
-{
-    m_metafields.type = type;
-}
-
-void FlipSocket::set_ttl(uint8_t ttl)
-{
-    m_metafields.ttl = ttl;
-}
-
-void FlipSocket::set_flow(uint32_t flow)
-{
-    m_metafields.flow = flow;
-}
-
-void FlipSocket::set_src(uint64_t src)
-{
-    m_metafields.src_hst = src;
-}
-
-void FlipSocket::set_len(uint16_t len) // dynamic - needs rework
-{
-    m_metafields.length = len;
-}
-
-void FlipSocket::set_checksum(uint16_t checksum) //dynamic - needs rework
-{
-    m_metafields.checksum = checksum;
-}
-
-void FlipSocket::set_offset(uint16_t offset)
-{
-    m_metafields.offset = offset;
-}
 
 void FlipSocket::clear_metafields()
 {
@@ -479,13 +431,13 @@ void SocketHandler::build_metaheader(FlipSocket s)
     s.get_metaheader(FLIP_OPT7)       ? m_bitmap[2] = m_bitmap[2] | FLIP_OPT7       : m_bitmap[2] = m_bitmap[2] & ~FLIP_OPT7;
 
     if (s.get_metaheader(FLIP_CONT3)){
-        bitmap_size = 4;
+        f_bitmap_size = 4;
     } else if (s.get_metaheader(FLIP_CONT2)) {
-        bitmap_size = 3;
+        f_bitmap_size = 3;
     } else if (s.get_metaheader(FLIP_CONT1)){
-        bitmap_size = 2;
+        f_bitmap_size = 2;
     } else {
-        bitmap_size = 1;
+        f_bitmap_size = 1;
     }
     
 }
@@ -586,7 +538,7 @@ void SocketHandler::build_metafields(FlipSocket s)
     //at this point, index is pointing to a null bit alfter the last field
     //in m_fields.
     if (index != 0){
-        fields_size = index - 1;
+        f_fields_size = index - 1;
     }
 }
 
@@ -1069,26 +1021,107 @@ int SocketHandler::parse_gtp_metafields(GTPsocket *g, uint8_t *message, int m_si
 
 
 /* WRAPPER FUNCTIONS */
-int setsocketopt()
+int FlipKernel::socket()
+{
+    //check if sockets left in memory, else return error
+    if (s_index >= MAX_SOCK_COUNT) {
+        return -1;
+    }
+    
+    s_index++;
+    
+    //return index to sockethandler array element
+    return (s_index - 1);
+}
+
+int FlipKernel::setsocketopt(int s, uint8_t sock_type, uint32_t option, uint32_t value)
+{
+    if (sock_type == SOCK_TYPE_FLIP) {
+        switch (option)
+        {
+            case FLIP_VERSION :
+                sockets[s].flip_s.set_metaheader(FLIP_VERSION, true);
+                sockets[s].flip_s.set_version(value);
+                break;
+            case FLIP_DEST_1 :
+                break;
+            case FLIP_DEST_4 :
+                break;
+            case FLIP_DEST_16 :
+                break;
+            case FLIP_TYPE :
+                break;
+            case FLIP_TTL :
+                break;
+            case FLIP_FLOW :
+                break;
+            case FLIP_SOURCE_1 :
+                break;
+            case FLIP_SOURCE_4 :
+                break;
+            case FLIP_SOURCE_16 :
+                break;
+            case FLIP_LENGTH :
+                break;
+            case FLIP_CHECKSUM :
+                break;
+            case FLIP_NOFRAG :
+                break;
+            case FLIP_FRAGOFFSET :
+                break;
+            case FLIP_LASTFRAG :
+                break;
+            case FLIP_OPT1 :
+                break;
+            case FLIP_OPT2 :
+                break;
+            case FLIP_OPT3 :
+                break;
+            case FLIP_OPT4 :
+                break;
+            case FLIP_OPT5 :
+                break;
+            case FLIP_OPT6 :
+                break;
+            case FLIP_OPT7 :
+                break;
+            default:
+                break;
+                
+        }
+        
+        return 0;
+    } else if (sock_type == SOCK_TYPE_GTP) {
+        
+        return 0;
+    }
+    
+    //if gets here, error - invalid socket type
+    return -1;
+}
+
+//get socket options
+uint32_t FlipKernel::getsocketopt(int s, uint8_t sock_type, uint32_t option)
 {
     return 0;
 }
 
-int getsocketopt()
+//write new message
+int FlipKernel::write(int s, char *buf, int len)
 {
     return 0;
 }
 
-int read()
+//wait and reat new message?
+int FlipKernel::read(int s, char *buf, int len)
 {
     return 0;
 }
 
-int write()
+void FlipKernel::kernel()
 {
-    return 0;
+    
 }
-
 
 /* TEST/PRINT FUNCTIONS */
 void print_metaheader(FlipSocket s)

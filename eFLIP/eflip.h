@@ -55,6 +55,9 @@
 #define GTP_MAX_BITMAP_SIZE     2
 #define GTP_MAX_FIELDS_SIZE     28
 
+#define FULLMSG_BUFFER_SIZE     128
+#define SOCK_TYPE_FLIP          1
+#define SOCK_TYPE_GTP           2
 /* STRUCTURES */
 struct flipbitmap
 {
@@ -150,22 +153,22 @@ public:
         FlipSocket::clear_metafields();
     }
     
-    void set_metaheader(int32_t bitmask, bool state);
+    void set_metabit(int32_t bitmask, bool state);
     bool get_metaheader(uint32_t bitmask);
     void clear_metaheader();
     void clear_metafields();
     void set_cont_bits();
     
     //header field values
-    void set_version(uint8_t ver);
-    void set_dest(uint64_t dest);
-    void set_type(uint8_t type);
-    void set_ttl(uint8_t ttl);
-    void set_flow(uint32_t flow);
-    void set_src(uint64_t src);
-    void set_len(uint16_t len);
-    void set_checksum(uint16_t checksum);
-    void set_offset(uint16_t offset);
+    void set_version(uint8_t ver){m_metafields.version = ver;};
+    void set_dest(uint64_t dest){m_metafields.dest_hst = dest;};
+    void set_type(uint8_t type){m_metafields.type = type;};
+    void set_ttl(uint8_t ttl){m_metafields.ttl = ttl;};
+    void set_flow(uint32_t flow){m_metafields.flow = flow;};
+    void set_src(uint64_t src){m_metafields.src_hst = src;};
+    void set_len(uint16_t len){m_metafields.length = len;};
+    void set_checksum(uint16_t checksum){m_metafields.checksum = checksum;};
+    void set_offset(uint16_t offset){m_metafields.offset = offset;};
 
     uint8_t get_version()   { return m_metafields.version; };
     uint64_t get_dest()     { return m_metafields.dest_hst; };
@@ -192,11 +195,12 @@ public:
         clear_metaheader();
     }
     
-    void set_metabit(uint16_t bitmask, bool state);
-    bool get_metabit(uint16_t bitmask);
     void clear_metaheader();
     void clear_metafields();
     void set_cont_bits();
+    
+    void set_metabit(uint16_t bitmask, bool state);
+    bool get_metabit(uint16_t bitmask);
     
     void set_flags(uint8_t flags) {m_metafields.flags = flags ;};
     void set_src(uint16_t src) {m_metafields.src = src ;};
@@ -227,16 +231,24 @@ public:
 // PACKET CLASS provides functionality to construct, and read FLIPSOCKET packets.
 class SocketHandler {
 private:
-    int bitmap_size;
-    int fields_size;
-    uint8_t m_bitmap[FLIP_MAX_BITMAP_SIZE+1]{};
-    uint8_t m_fields[FLIP_MAX_FIELDS_SIZE+1]{};
+    //FlipSocket flip_s;
+    //GTPsocket gtp_s;
+    int f_bitmap_size;
+    int f_fields_size;
     int g_bitmap_size;
     int g_fields_size;
+    uint8_t m_bitmap[FLIP_MAX_BITMAP_SIZE+1]{};
+    uint8_t m_fields[FLIP_MAX_FIELDS_SIZE+1]{};
     uint8_t g_bitmap[GTP_MAX_BITMAP_SIZE+1]{};
     uint8_t g_fields[GTP_MAX_FIELDS_SIZE+1]{};
     
+    uint8_t rcv_buffer[FULLMSG_BUFFER_SIZE]{};
+    uint8_t snt_buffer[FULLMSG_BUFFER_SIZE]{};
+    
 public:
+    FlipSocket flip_s;
+    GTPsocket gtp_s;
+    
     //constructor
     SocketHandler(){}
     
@@ -248,8 +260,8 @@ public:
     
     uint8_t* get_metafields() {return m_fields;};
     uint8_t* get_bitmap() {return m_bitmap;};
-    int get_fields_size() {return fields_size;};
-    int get_bitmap_size() {return bitmap_size;};
+    int get_fields_size() {return f_fields_size;};
+    int get_bitmap_size() {return f_bitmap_size;};
 
     //build GTP bitmap and fields
     void build_gtp_metaheader(GTPsocket g);
@@ -264,21 +276,40 @@ public:
     
 };
 
-/* PUBLIC FUNCTIONS */
-int setsocketopt();
-int getsocketopt();
-int read();
-int write();
-
+/* KERNEL */
+class FlipKernel {
+private:
+    SocketHandler sockets[2]{};
+    int s_index;
+    
+public:
+    //constructors
+    FlipKernel()
+    {
+        s_index = 0;
+    }
+    
+    //initialize new socket
+    int socket();
+    //set socket options
+    int setsocketopt(int s, uint8_t sock_type, uint32_t option, uint32_t value);
+    //get socket options
+    uint32_t getsocketopt(int s, uint8_t sock_type, uint32_t option);
+    //write new message
+    int write(int s, char *buf, int len);
+    //wait and reat new message?
+    int read(int s, char *buf, int len);
+    //this function executes the FLIP kernel
+    void kernel();
+    
+}; 
 
 /* HELPER/PRIVATE FUNCTIONS */
-//uint8_t* get_flip_metaheader(FlipSocket s);
 
 /* TEST FUNCTIONS */
 void print_metaheader(FlipSocket s);
 void print_metafields(FlipSocket s);
 void print_gtp_metaheader(GTPsocket g);
 void print_gtp_metafields(GTPsocket g);
-
 
 #endif /* eflip_h */
