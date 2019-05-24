@@ -394,7 +394,6 @@ void GTPsocket::set_cont_bits()
     m_metaheader.cont2 = false;
 }
 
-void SocketHandler::build_metaheader(FlipSocket s)
 void SocketHandler::build_flip_metaheader(FlipSocket s)
 {
     //int bitmap_size;
