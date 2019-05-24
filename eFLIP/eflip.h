@@ -58,6 +58,7 @@
 #define FULLMSG_BUFFER_SIZE     128
 #define SOCK_TYPE_FLIP          1
 #define SOCK_TYPE_GTP           2
+#define KERNEL_QUEUE_SIZE       2
 /* STRUCTURES */
 struct flipbitmap
 {
@@ -242,26 +243,25 @@ private:
     uint8_t g_bitmap[GTP_MAX_BITMAP_SIZE+1]{};
     uint8_t g_fields[GTP_MAX_FIELDS_SIZE+1]{};
     
-    uint8_t rcv_buffer[FULLMSG_BUFFER_SIZE]{};
-    uint8_t snt_buffer[FULLMSG_BUFFER_SIZE]{};
-    
 public:
     FlipSocket flip_s;
     GTPsocket gtp_s;
+    uint8_t rcv_buffer[FULLMSG_BUFFER_SIZE]{};
+    uint8_t snt_buffer[FULLMSG_BUFFER_SIZE]{};
     
     //constructor
     SocketHandler(){}
     
     //build FLIP bitmap and fields
-    void build_metaheader(FlipSocket s);
-    void build_metafields(FlipSocket s);
+    void build_flip_metaheader(FlipSocket s);
+    void build_flip_metafields(FlipSocket s);
     int parse_flip_metaheader(FlipSocket *s, uint8_t *message, int m_size);
     int parse_flip_metafields(FlipSocket *s, uint8_t *message, int m_size, int index);
     
-    uint8_t* get_metafields() {return m_fields;};
-    uint8_t* get_bitmap() {return m_bitmap;};
-    int get_fields_size() {return f_fields_size;};
-    int get_bitmap_size() {return f_bitmap_size;};
+    uint8_t* get_flip_metafields() {return m_fields;};
+    uint8_t* get_flip_bitmap() {return m_bitmap;};
+    int get_flip_fieldssize() {return f_fields_size;};
+    int get_flip_bitmapsize() {return f_bitmap_size;};
 
     //build GTP bitmap and fields
     void build_gtp_metaheader(GTPsocket g);
@@ -279,17 +279,36 @@ public:
 /* KERNEL */
 class FlipKernel {
 private:
-    SocketHandler sockets[2]{};
+    SocketHandler sockets[KERNEL_QUEUE_SIZE]{};
+    int msglen[KERNEL_QUEUE_SIZE]{};
+    uint8_t *ptr[KERNEL_QUEUE_SIZE]{};
     int s_index;
+    bool toSend;
+    bool toRead;
+    
+    bool (*write_to_phy)(const uint8_t*, uint8_t){};
+    bool (*read_from_phy)(uint8_t*, uint8_t*){};
     
 public:
     //constructors
     FlipKernel()
     {
         s_index = 0;
+        toSend = false;
+        toRead = false;
+        //write_to_phy = NULL;
+        //read_from_phy = NULL;
     }
     
-    //initialize new socket
+    FlipKernel(bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*))
+    {
+        FlipKernel();
+        init(write, read);
+    }
+    
+    //initialize new kernel
+    void init(bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*));
+    //create new socket
     int socket();
     //set socket options
     int setsocketopt(int s, uint8_t sock_type, uint32_t option, uint32_t value);

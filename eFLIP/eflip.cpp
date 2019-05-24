@@ -395,6 +395,7 @@ void GTPsocket::set_cont_bits()
 }
 
 void SocketHandler::build_metaheader(FlipSocket s)
+void SocketHandler::build_flip_metaheader(FlipSocket s)
 {
     //int bitmap_size;
     //uint8_t m_bitmap[FLIP_MAX_BITMAP_SIZE+1]{};
@@ -442,7 +443,7 @@ void SocketHandler::build_metaheader(FlipSocket s)
     
 }
 
-void SocketHandler::build_metafields(FlipSocket s)
+void SocketHandler::build_flip_metafields(FlipSocket s)
 {
     //int fields_size;
     //uint8_t m_fields[FLIP_MAX_FIELDS_SIZE+1]{};
@@ -1040,60 +1041,163 @@ int FlipKernel::setsocketopt(int s, uint8_t sock_type, uint32_t option, uint32_t
         switch (option)
         {
             case FLIP_VERSION :
-                sockets[s].flip_s.set_metabit(FLIP_VERSION, true);
+                sockets[s].flip_s.set_metabit(option, true);
                 sockets[s].flip_s.set_version(value);
                 break;
             case FLIP_DEST_1 :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_dest(value);
                 break;
             case FLIP_DEST_4 :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_dest(value);
                 break;
             case FLIP_DEST_16 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_dest(value)
                 break;
             case FLIP_TYPE :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_type(value);
                 break;
             case FLIP_TTL :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_ttl(value);
                 break;
             case FLIP_FLOW :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_flow(value);
                 break;
             case FLIP_SOURCE_1 :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_src(value);
                 break;
             case FLIP_SOURCE_4 :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_src(value);
                 break;
             case FLIP_SOURCE_16 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_src(value);
                 break;
             case FLIP_LENGTH :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_len(value);
                 break;
             case FLIP_CHECKSUM :
+                sockets[s].flip_s.set_metabit(option, true);
+                sockets[s].flip_s.set_checksum(value);
                 break;
             case FLIP_NOFRAG :
+                sockets[s].flip_s.set_metabit(option, true);
                 break;
             case FLIP_FRAGOFFSET :
+                //sockets[s].flip_s.set_metabit(option, true);
                 break;
             case FLIP_LASTFRAG :
+                //sockets[s].flip_s.set_metabit(option, true);
                 break;
             case FLIP_OPT1 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_opt1(value);
                 break;
             case FLIP_OPT2 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_opt2(value);
                 break;
             case FLIP_OPT3 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_opt3(value);
                 break;
             case FLIP_OPT4 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_opt4(value);
                 break;
             case FLIP_OPT5 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_opt5(value);
                 break;
             case FLIP_OPT6 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_opt6(value);
                 break;
             case FLIP_OPT7 :
+                sockets[s].flip_s.set_metabit(option, true);
+                //sockets[s].flip_s.set_opt7(value);
                 break;
             default:
+                //wrong option - return error
+                return -1;
                 break;
-                
         }
-        
         return 0;
+        
     } else if (sock_type == SOCK_TYPE_GTP) {
-        
+        switch (option)
+        {
+            case GTP_FLAGS :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_flags(value);
+                break;
+            case GTP_SOURCE :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_src(value);
+                break;
+            case GTP_DEST :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_dest(value);
+                break;
+            case GTP_SEQ :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_seq(value);
+                break;
+            case GTP_ACK :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_ack(value);
+                break;
+            case GTP_TIMESTAMP :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_tstamp(value);
+                break;
+            case GTP_CHECKSUM :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_checksum(value);
+                break;
+            case GTP_W_SIZE :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_wsize(value);
+                break;
+            case GTP_URGENT :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_urgent(value);
+                break;
+            case GTP_LENGTH :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_len(value);
+                break;
+            case GTP_NEXTPROTO :
+                sockets[s].gtp_s.set_metabit(option, true);
+                sockets[s].gtp_s.set_nextp(value);
+                break;
+            case GTP_OPT1 :
+                sockets[s].gtp_s.set_metabit(option, true);
+                //sockets[s].gtp_s.set_opt1();;
+                break;
+            case GTP_OPT2 :
+                sockets[s].gtp_s.set_metabit(option, true);
+                //sockets[s].gtp_s.set_opt2();
+                break;
+            case GTP_OPT3 :
+                sockets[s].gtp_s.set_metabit(option, true);
+                //sockets[s].gtp_s.set_opt3();
+                break;
+            default:
+                //wrong option - return error
+                return -1;
+                break;
+        }
         return 0;
+        
     }
     
     //if gets here, error - invalid socket type
@@ -1103,12 +1207,199 @@ int FlipKernel::setsocketopt(int s, uint8_t sock_type, uint32_t option, uint32_t
 //get socket options
 uint32_t FlipKernel::getsocketopt(int s, uint8_t sock_type, uint32_t option)
 {
-    return 0;
+    if (sock_type == SOCK_TYPE_FLIP){
+        switch (option)
+        {
+            case FLIP_VERSION:
+                return sockets[0].flip_s.get_version();
+            case FLIP_DEST_1:
+                return (uint32_t) sockets[0].flip_s.get_dest();
+            case FLIP_DEST_4:
+                return (uint32_t) sockets[0].flip_s.get_dest();
+            case FLIP_DEST_16:
+                //return sockets[0].flip_s.get_dest();
+                break;
+            case FLIP_TYPE:
+                return sockets[0].flip_s.get_type();
+            case FLIP_TTL:
+                return sockets[0].flip_s.get_ttl();
+            case FLIP_FLOW:
+                return sockets[0].flip_s.get_flow();
+            case FLIP_SOURCE_1:
+                return (uint32_t) sockets[0].flip_s.get_src();
+            case FLIP_SOURCE_4:
+                return (uint32_t) sockets[0].flip_s.get_src();
+            case FLIP_SOURCE_16:
+                //return sockets[0].flip_s.get_src();
+                break;
+            case FLIP_LENGTH:
+                return sockets[0].flip_s.get_len();
+            case FLIP_CHECKSUM:
+                return sockets[0].flip_s.get_checksum();
+//            case FLIP_NOFRAG:
+//                break;
+//            case FLIP_FRAGOFFSET:
+//                break;
+//            case FLIP_LASTFRAG:
+//                break;
+            case FLIP_OPT1:
+                break;
+            case FLIP_OPT2:
+                break;
+            case FLIP_OPT3:
+                break;
+            case FLIP_OPT4:
+                break;
+            case FLIP_OPT5:
+                break;
+            case FLIP_OPT6:
+                break;
+            case FLIP_OPT7:
+                break;
+            default:
+                //error - invalid option
+                return -1;
+                break;
+        }
+        return 0;
+        
+    } else if (sock_type == SOCK_TYPE_GTP){
+        switch (option)
+        {
+            case GTP_FLAGS :
+                return sockets[s].gtp_s.get_flags();
+            case GTP_SOURCE :
+                return sockets[s].gtp_s.get_src();
+            case GTP_DEST :
+                return sockets[s].gtp_s.get_dest();
+            case GTP_SEQ :
+                return sockets[s].gtp_s.get_seq();
+            case GTP_ACK :
+                return sockets[s].gtp_s.get_ack();
+            case GTP_TIMESTAMP :
+                return sockets[s].gtp_s.get_tstamp();
+            case GTP_CHECKSUM :
+                return sockets[s].gtp_s.get_checksum();
+            case GTP_W_SIZE :
+                return sockets[s].gtp_s.get_wsize();
+            case GTP_URGENT :
+                return sockets[s].gtp_s.get_urgent();
+            case GTP_LENGTH :
+                return sockets[s].gtp_s.get_len();
+            case GTP_NEXTPROTO :
+                return sockets[s].gtp_s.get_nextp();
+            case GTP_OPT1 :
+                break;
+            case GTP_OPT2 :
+                break;
+            case GTP_OPT3 :
+                break;
+            default:
+                //error - invalid option
+                return -1;
+                break;
+        }
+        return 0;
+        
+    }
+    
+    //if it gets here, return error - invalid socket type
+    return -1;
 }
 
 //write new message
 int FlipKernel::write(int s, char *buf, int len)
 {
+    int g_size;
+    int f_size;
+    uint8_t *g_bitmap;
+    uint8_t *f_bitmap;
+    int index = 0;
+    
+    //set continuation bits for flip and gtp metaheaders
+    sockets[s].gtp_s.set_cont_bits();
+    sockets[s].flip_s.set_cont_bits();
+
+    //build flip and gtp metaheaders
+    sockets[s].build_gtp_metaheader(sockets[s].gtp_s);
+    sockets[s].build_flip_metaheader(sockets[s].flip_s);
+    
+    //get pointers to flip and gtp str buffers
+    f_bitmap = sockets[s].get_flip_bitmap();
+    g_bitmap = sockets[s].get_gtp_bitmap();
+    
+    //get size of flip and gtp str's
+    f_size = sockets[s].get_flip_bitmapsize();
+    g_size = sockets[s].get_gtp_bitmapsize();
+    
+    //copy flip headers to pacekt
+    if (f_bitmap[0] > 0) {
+        for (index = 0 ; index < f_size; index++){
+            sockets[s].snt_buffer[index] = f_bitmap[index];
+        }
+        
+        sockets[s].build_flip_metafields(sockets[s].flip_s);
+        f_bitmap = sockets[s].get_flip_metafields();
+        f_size = sockets[s].get_flip_fieldssize();
+        
+        for (int i = 0; i <= f_size; i++){
+            sockets[s].snt_buffer[index] = f_bitmap[i];
+            index++;
+        }
+    }
+    
+    //copy gtp headers to packet
+    if ( g_bitmap[0] > 0) {
+        for (int i = 0; i < g_size; i++){
+            sockets[s].snt_buffer[index] = g_bitmap[i];
+            index++;
+        }
+        
+        sockets[s].build_gtp_metafields(sockets[s].gtp_s);
+        g_bitmap = sockets[s].get_gtp_metafields();
+        g_size = sockets[s].get_gtp_fieldsize();
+        
+        for (int i = 0; i <= g_size; i++){
+            sockets[s].snt_buffer[index] = g_bitmap[i];
+            index++;
+        }
+    }
+    
+    //copy messg string from caller app.
+    for (int i=0; i < len; i++){
+        sockets[s].snt_buffer[index] = (uint8_t) buf[i];
+        index++;
+    }
+    
+    //flag kernel there is new data to send
+    toSend = true;
+    //add message to ptr
+    ptr[s] = sockets[s].snt_buffer;
+    msglen[s] = index - 1;
+    
+    
+//    //print - remove after testing
+//    std::cout << "Packet in binary:\n";
+//    for (int i=0; i<index; i++ ){
+//        std::cout << std::bitset<8> (sockets[s].snt_buffer[i]) << " " ;
+//    }
+//    std::cout << std::endl;
+//    std::cout << std::endl;
+//
+//    std::cout << "Packet in hex:\n";
+//    for (int i=0; i<index; i++ ){
+//        std::cout << std::hex << (int) sockets[s].snt_buffer[i] << " " ;
+//    }
+//    std::cout << std::endl;
+//    std::cout << std::endl;
+//
+//    std::cout << "Packet in *char:\n";
+//    for (int i=0; i<index; i++ ){
+//        std::cout << (char) sockets[s].snt_buffer[i] << " " ;
+//    }
+//    std::cout << std::endl;
+//    std::cout << std::endl;
+    
     return 0;
 }
 
@@ -1120,7 +1411,28 @@ int FlipKernel::read(int s, char *buf, int len)
 
 void FlipKernel::kernel()
 {
+    if (toRead){
+        //read to buffer
+        
+    } else if (toSend){
+        //send next msg to lora
+        for (int i = 0; i < KERNEL_QUEUE_SIZE; i++ ){
+            if (ptr[i] != NULL){
+                write_to_phy(ptr[i], msglen[i]);
+                ptr[i] = NULL;
+                msglen[i] = 0;
+                break;
+            }
+        }
+    }
     
+}
+
+
+void FlipKernel::init(bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*))
+{
+    write_to_phy = write;
+    read_from_phy = read;
 }
 
 /* TEST/PRINT FUNCTIONS */

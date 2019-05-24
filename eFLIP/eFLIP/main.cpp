@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include <string.h>
 #include <bitset>
 #include "eflip.h"
 
@@ -14,13 +15,15 @@ void test_metaheader(void);
 void test_metafields(void);
 void test_buildandparse(void);
 void test_gtpsockets(void);
+void test_full_packetbuilder(void);
     
 int main(int argc, const char * argv[]) {
     
     //test_metaheader();
     //test_metafields();
     //test_buildandparse();
-    test_gtpsockets();
+    //test_gtpsockets();
+    test_full_packetbuilder();
     
     return 0;
 }
@@ -45,10 +48,10 @@ void test_metaheader(void)
     mysocket.set_metabit(FLIP_LASTFRAG, true );
 
     uint8_t *a;
-    handler.build_metaheader(mysocket);
-    a = handler.get_bitmap();
+    handler.build_flip_metaheader(mysocket);
+    a = handler.get_flip_bitmap();
     
-    int max = handler.get_bitmap_size();
+    int max = handler.get_flip_bitmapsize(); 
     
     mysocket.set_cont_bits();
     std::cout << "max= " << max << std::endl;
@@ -100,9 +103,9 @@ void test_metafields(void)
     mysocket.set_offset(45);
 
     uint8_t *m;
-    handler.build_metafields(mysocket);
-    m = handler.get_metafields();
-    int max = handler.get_fields_size();
+    handler.build_flip_metafields(mysocket);
+    m = handler.get_flip_metafields();
+    int max = handler.get_flip_fieldssize();
     
     std::cout << "max= " << max << std::endl;
     
@@ -151,9 +154,9 @@ void test_buildandparse(){
     s_socket.set_offset(65535);
     
     //build flip bitmap
-    s_handler.build_metaheader(s_socket);
-    bitmap = s_handler.get_bitmap();
-    b_size = s_handler.get_bitmap_size();
+    s_handler.build_flip_metaheader(s_socket);
+    bitmap = s_handler.get_flip_bitmap();
+    b_size = s_handler.get_flip_bitmapsize();
     s_socket.set_cont_bits();
     
     std::cout << "bitmap-size= " << b_size << std::endl;
@@ -168,9 +171,9 @@ void test_buildandparse(){
     std::cout << "\n";
     
     //build metafields
-    s_handler.build_metafields(s_socket);
-    fields = s_handler.get_metafields();
-    f_size = s_handler.get_fields_size();
+    s_handler.build_flip_metafields(s_socket);
+    fields = s_handler.get_flip_metafields();
+    f_size = s_handler.get_flip_fieldssize();
     
     std::cout << "fields-size= " << f_size << std::endl;
     for (int i=0; i<=f_size; i++ ){
@@ -292,4 +295,20 @@ void test_gtpsockets(){
     std::cout << "Handersize =" << sizeof(rcv_h) << "\n";
     std::cout << std::endl;
     std::cout << std::endl;
+}
+
+void test_full_packetbuilder(void){
+    
+    FlipKernel network;
+    char buf[] = "Hello World!";
+    int s;
+    
+    s = network.socket();
+    network.setsocketopt(s, SOCK_TYPE_FLIP, FLIP_VERSION, 1);
+    network.setsocketopt(s, SOCK_TYPE_FLIP, FLIP_DEST_1, 224);
+    network.setsocketopt(s, SOCK_TYPE_FLIP, FLIP_TTL, 4);
+    network.setsocketopt(s, SOCK_TYPE_FLIP, FLIP_SOURCE_1, 64);
+    
+    network.write(s, buf, (int) strlen(buf));
+    
 }
