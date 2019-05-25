@@ -1371,33 +1371,10 @@ int FlipKernel::write(int s, char *buf, int len)
     }
     
     //flag kernel there is new data to send
-    toSend = true;
+    toSend++;
     //add message to ptr
     ptr[s] = sockets[s].snt_buffer;
     msglen[s] = index - 1;
-    
-    
-//    //print - remove after testing
-//    std::cout << "Packet in binary:\n";
-//    for (int i=0; i<index; i++ ){
-//        std::cout << std::bitset<8> (sockets[s].snt_buffer[i]) << " " ;
-//    }
-//    std::cout << std::endl;
-//    std::cout << std::endl;
-//
-//    std::cout << "Packet in hex:\n";
-//    for (int i=0; i<index; i++ ){
-//        std::cout << std::hex << (int) sockets[s].snt_buffer[i] << " " ;
-//    }
-//    std::cout << std::endl;
-//    std::cout << std::endl;
-//
-//    std::cout << "Packet in *char:\n";
-//    for (int i=0; i<index; i++ ){
-//        std::cout << (char) sockets[s].snt_buffer[i] << " " ;
-//    }
-//    std::cout << std::endl;
-//    std::cout << std::endl;
     
     return 0;
 }
@@ -1410,19 +1387,38 @@ int FlipKernel::read(int s, char *buf, int len)
 
 void FlipKernel::kernel()
 {
-    if (toRead){
-        //read to buffer
-        
-    } else if (toSend){
+//    if (read_from_phy(buf, &buflen)){
+//        //received packet - analyze it!
+//        
+//    }
+    
+    if (toSend > 0){
         //send next msg to lora
         for (int i = 0; i < KERNEL_QUEUE_SIZE; i++ ){
             if (ptr[i] != NULL){
-                write_to_phy(ptr[i], msglen[i]);
+//                    //print - remove after testing
+//                    std::cout << "Packet in binary:\n";
+//                    for (int j=0; j < msglen[i]; j++ ){
+//                        std::cout << std::bitset<8> (*ptr[i] + j) << " " ;
+//                    }
+//                    std::cout << std::endl;
+//                    std::cout << std::endl;
+//
+//                    std::cout << "Packet in *char:\n";
+//                    for (int j=0; j<msglen[i]; j++ ){
+//                        std::cout << (char) *(ptr[i] + j) << " " ;
+//                    }
+//                    std::cout << std::endl;
+//                    std::cout << std::endl;
+                
+                write_to_phy( ptr[i], msglen[i]);
                 ptr[i] = NULL;
                 msglen[i] = 0;
+                toSend--;
                 break;
             }
         }
+        
     }
     
 }

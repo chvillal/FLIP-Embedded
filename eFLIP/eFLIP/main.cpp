@@ -311,4 +311,5 @@ void test_full_packetbuilder(void){
     
     network.write(s, buf, (int) strlen(buf));
     
+    network.kernel();
 }

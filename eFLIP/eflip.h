@@ -283,31 +283,34 @@ private:
     int msglen[KERNEL_QUEUE_SIZE]{};
     uint8_t *ptr[KERNEL_QUEUE_SIZE]{};
     int s_index;
-    bool toSend;
-    bool toRead;
+    uint8_t toSend;
+    //uint8_t toRead;
+    uint8_t buf[256]{};
+    uint8_t buflen;
     
+public:
     bool (*write_to_phy)(const uint8_t*, uint8_t){};
     bool (*read_from_phy)(uint8_t*, uint8_t*){};
     
-public:
     //constructors
     FlipKernel()
     {
         s_index = 0;
+        buflen=0;
         toSend = false;
-        toRead = false;
+        //toRead = false;
         //write_to_phy = NULL;
         //read_from_phy = NULL;
     }
     
-    FlipKernel(bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*))
+    FlipKernel( bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*))
     {
         FlipKernel();
         init(write, read);
     }
     
     //initialize new kernel
-    void init(bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*));
+    void init( bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*));
     //create new socket
     int socket();
     //set socket options
