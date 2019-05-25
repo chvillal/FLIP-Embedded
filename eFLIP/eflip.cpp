@@ -8,10 +8,6 @@
 
 /* LIBRARIES */
 #include "eflip.h"
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
-#include <iostream>
 
 /* DEFINES */
 #define FLIP_CONT1      0x800000
@@ -1395,7 +1391,7 @@ void FlipKernel::kernel()
     if (toSend > 0){
         //send next msg to lora
         for (int i = 0; i < KERNEL_QUEUE_SIZE; i++ ){
-            if (ptr[i] != NULL){
+            if (ptr[i] != 0){
 //                    //print - remove after testing
 //                    std::cout << "Packet in binary:\n";
 //                    for (int j=0; j < msglen[i]; j++ ){
@@ -1412,7 +1408,7 @@ void FlipKernel::kernel()
 //                    std::cout << std::endl;
                 
                 write_to_phy( ptr[i], msglen[i]);
-                ptr[i] = NULL;
+                ptr[i] = 0;
                 msglen[i] = 0;
                 toSend--;
                 break;
@@ -1431,6 +1427,7 @@ void FlipKernel::init(bool (*write)(uint8_t*, uint8_t), bool (*read)(uint8_t*, u
 }
 
 /* TEST/PRINT FUNCTIONS */
+#ifdef FLIP_LOCAL_TESTING
 void print_metaheader(FlipSocket s)
 {
     std::cout << "cont1: " << s.get_metabit(FLIP_CONT1) ;
@@ -1505,3 +1502,4 @@ void print_gtp_metafields(GTPsocket g)
     std::cout << std::dec << "\nlen: " <<   (int) g.get_len() ;
     std::cout << std::dec << "\nnextp: " <<   (int) g.get_nextp() ;
 }
+#endif

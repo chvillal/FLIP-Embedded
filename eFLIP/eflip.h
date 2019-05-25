@@ -9,8 +9,14 @@
 #ifndef eflip_h
 #define eflip_h
 
+//#define FLIP_LOCAL_TESTING
+
 /* LIBRARIES */
 #include <stdint.h>
+
+#ifdef FLIP_LOCAL_TESTING
+#include <iostream>
+#endif
 
 /* DEFINES */
 #define FLIP_ESP            0x400000
@@ -329,9 +335,11 @@ public:
 /* HELPER/PRIVATE FUNCTIONS */
 
 /* TEST FUNCTIONS */
+#ifdef FLIP_LOCAL_TESTING
 void print_metaheader(FlipSocket s);
 void print_metafields(FlipSocket s);
 void print_gtp_metaheader(GTPsocket g);
 void print_gtp_metafields(GTPsocket g);
+#endif
 
 #endif /* eflip_h */
