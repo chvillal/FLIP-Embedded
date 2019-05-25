@@ -1424,7 +1424,7 @@ void FlipKernel::kernel()
 }
 
 
-void FlipKernel::init(bool (*write)(uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t))
+void FlipKernel::init(bool (*write)(uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*))
 {
     write_to_phy = write;
     read_from_phy = read;
