@@ -289,8 +289,8 @@ private:
     uint8_t buflen;
     
 public:
-    bool (*write_to_phy)(const uint8_t*, uint8_t){};
-    bool (*read_from_phy)(uint8_t*, uint8_t*){};
+    bool (*write_to_phy)(uint8_t*, uint8_t){};
+    bool (*read_from_phy)(uint8_t*, uint8_t){};
     
     //constructors
     FlipKernel()
@@ -303,14 +303,14 @@ public:
         //read_from_phy = NULL;
     }
     
-    FlipKernel( bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*))
+    FlipKernel( bool (*write)( uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t))
     {
         FlipKernel();
         init(write, read);
     }
     
     //initialize new kernel
-    void init( bool (*write)(const uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*));
+    void init( bool (*write)(uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t));
     //create new socket
     int socket();
     //set socket options
