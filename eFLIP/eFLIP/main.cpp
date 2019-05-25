@@ -16,6 +16,7 @@ void test_metafields(void);
 void test_buildandparse(void);
 void test_gtpsockets(void);
 void test_full_packetbuilder(void);
+void test_str(void);
     
 int main(int argc, const char * argv[]) {
     
@@ -23,7 +24,8 @@ int main(int argc, const char * argv[]) {
     //test_metafields();
     //test_buildandparse();
     //test_gtpsockets();
-    test_full_packetbuilder();
+    //test_full_packetbuilder();
+    test_str();
     
     return 0;
 }
@@ -312,4 +314,11 @@ void test_full_packetbuilder(void){
     network.write(s, buf, (int) strlen(buf));
     
     network.kernel();
+}
+
+void test_str(void){
+    char *buf = "EVENT-ENDED";
+    int i = (int) strlen(buf);
+    
+    std::cout << "size:" << i << std::endl;
 }

@@ -1370,7 +1370,7 @@ int FlipKernel::write(int s, char *buf, int len)
     toSend++;
     //add message to ptr
     ptr[s] = sockets[s].snt_buffer;
-    msglen[s] = index - 1;
+    msglen[s] = index;
     
     return 0;
 }
