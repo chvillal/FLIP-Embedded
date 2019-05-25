@@ -9,7 +9,7 @@
 #ifndef eflip_h
 #define eflip_h
 
-//#define FLIP_LOCAL_TESTING
+#define FLIP_LOCAL_TESTING
 
 /* LIBRARIES */
 #include <stdint.h>
@@ -160,7 +160,7 @@ public:
         FlipSocket::clear_metafields();
     }
     
-    void set_metabit(int32_t bitmask, bool state);
+    int  set_metabit(int32_t bitmask, bool state);
     bool get_metabit(uint32_t bitmask);
     void clear_metaheader();
     void clear_metafields();
@@ -206,7 +206,7 @@ public:
     void clear_metafields();
     void set_cont_bits();
     
-    void set_metabit(uint16_t bitmask, bool state);
+    int  set_metabit(uint16_t bitmask, bool state);
     bool get_metabit(uint16_t bitmask);
     
     void set_flags(uint8_t flags) {m_metafields.flags = flags ;};
@@ -286,11 +286,14 @@ public:
 class FlipKernel {
 private:
     SocketHandler sockets[KERNEL_QUEUE_SIZE]{};
+    SocketHandler temp;
+    
     int msglen[KERNEL_QUEUE_SIZE]{};
     uint8_t *ptr[KERNEL_QUEUE_SIZE]{};
     int s_index;
+    int readfrom;
     uint8_t toSend;
-    //uint8_t toRead;
+    bool toRead[KERNEL_QUEUE_SIZE] = {0};
     uint8_t buf[256]{};
     uint8_t buflen;
     
@@ -319,8 +322,10 @@ public:
     void init( bool (*write)(uint8_t*, uint8_t), bool (*read)(uint8_t*, uint8_t*));
     //create new socket
     int socket();
-    //set socket options
+    //set and enable socket options
     int setsocketopt(int s, uint8_t sock_type, uint32_t option, uint32_t value);
+    //enable socket options
+    int ensocketopt(int s, uint8_t sock_type, uint32_t option, bool state);
     //get socket options
     uint32_t getsocketopt(int s, uint8_t sock_type, uint32_t option);
     //write new message

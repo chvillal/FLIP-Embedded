@@ -34,7 +34,7 @@ void FlipSocket::clear_metafields()
     m_metafields.offset = 0;
 }
 
-void FlipSocket::set_metabit(int32_t bitmask, bool state)
+int FlipSocket::set_metabit(int32_t bitmask, bool state)
 {
     switch(bitmask)
     {
@@ -123,8 +123,11 @@ void FlipSocket::set_metabit(int32_t bitmask, bool state)
             m_metaheader.opt7 = state;
             break;
         default:
+            return -1;
             break;
     }
+    
+    return 0;
 }
 
 bool FlipSocket::get_metabit(uint32_t bitmask)
@@ -242,7 +245,7 @@ void FlipSocket::set_cont_bits()
     m_metaheader.cont3 = false;
 }
 
-void GTPsocket::set_metabit(uint16_t bitmask, bool state)
+int GTPsocket::set_metabit(uint16_t bitmask, bool state)
 {
     switch (bitmask)
     {
@@ -295,8 +298,11 @@ void GTPsocket::set_metabit(uint16_t bitmask, bool state)
             m_metaheader.opt3 = state;
             break;
         default:
+            return -1;
             break;
     }
+    
+    return 0;
 }
 
 bool GTPsocket::get_metabit(uint16_t bitmask)
@@ -1199,6 +1205,21 @@ int FlipKernel::setsocketopt(int s, uint8_t sock_type, uint32_t option, uint32_t
     return -1;
 }
 
+int FlipKernel::ensocketopt(int s, uint8_t sock_type, uint32_t option, bool state)
+{
+    if (sock_type == SOCK_TYPE_FLIP) {
+        sockets[s].flip_s.set_metabit(option, state);
+        return 0;
+        
+    } else if (sock_type == SOCK_TYPE_GTP) {
+        sockets[s].gtp_s.set_metabit(option, state);
+        return 0;
+    }
+
+    //if gets here, error - invalid socket type
+    return -1;
+}
+
 //get socket options
 uint32_t FlipKernel::getsocketopt(int s, uint8_t sock_type, uint32_t option)
 {
@@ -1378,15 +1399,44 @@ int FlipKernel::write(int s, char *buf, int len)
 //wait and reat new message?
 int FlipKernel::read(int s, char *buf, int len)
 {
+    
+    if (toRead[s]){
+        int buf_end = buflen - readfrom;
+        for (int i = 0; i < buf_end; i++){
+            if (i >= len)
+                break;
+            
+            buf[i] = FlipKernel::buf[readfrom+i];
+            readfrom = 0;
+            toRead[i] = false;
+        }
+        return 1;
+    }
+    
     return 0;
 }
 
 void FlipKernel::kernel()
 {
-//    if (read_from_phy(buf, &buflen)){
-//        //received packet - analyze it!
-//
-//    }
+    if (read_from_phy(buf, &buflen)){
+        //received packet - is it for us?!
+        //call fuctions to  parse packet
+        int index, i;
+        index = temp.parse_flip_metaheader(&temp.flip_s, buf, buflen);
+        index = temp.parse_flip_metafields(&temp.flip_s, buf, buflen, index);
+        
+        for (i = 0; i < KERNEL_QUEUE_SIZE; i++){
+            if (temp.flip_s.get_dest() == sockets[i].flip_s.get_src() ){
+                //packet is for us. Analyze here (crc, len, read gtp, ...)
+                
+                //return buffer info to socket read call ();
+                readfrom = index;
+                toRead[i] = true;
+                break;
+            }
+        }
+
+    }
     
     if (toSend > 0){
         //send next msg to lora
@@ -1414,6 +1464,8 @@ void FlipKernel::kernel()
                 break;
             }
         }
+        
+        //manage reliability here and other network functions - pending
         
     }
     
