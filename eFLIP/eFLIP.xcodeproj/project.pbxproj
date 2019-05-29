@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C24C9792299F54300143EA4 /* kraken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4C24C9782299F54300143EA4 /* kraken.cpp */; };
 		4C7C905C227FF9CB0097E140 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4C7C905B227FF9CB0097E140 /* main.cpp */; };
 		4C7C9064227FFACC0097E140 /* eflip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4C7C9062227FFACC0097E140 /* eflip.cpp */; };
 /* End PBXBuildFile section */
@@ -24,6 +25,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4C24C9772299F51300143EA4 /* kraken.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kraken.h; sourceTree = "<group>"; };
+		4C24C9782299F54300143EA4 /* kraken.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = kraken.cpp; sourceTree = "<group>"; };
 		4C7C9058227FF9CB0097E140 /* eFLIP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = eFLIP; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C7C905B227FF9CB0097E140 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		4C7C9062227FFACC0097E140 /* eflip.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = eflip.cpp; sourceTree = SOURCE_ROOT; };
@@ -63,6 +66,8 @@
 				4C7C905B227FF9CB0097E140 /* main.cpp */,
 				4C7C90652280D1ED0097E140 /* eflip.h */,
 				4C7C9062227FFACC0097E140 /* eflip.cpp */,
+				4C24C9772299F51300143EA4 /* kraken.h */,
+				4C24C9782299F54300143EA4 /* kraken.cpp */,
 			);
 			path = eFLIP;
 			sourceTree = "<group>";
@@ -123,6 +128,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C24C9792299F54300143EA4 /* kraken.cpp in Sources */,
 				4C7C9064227FFACC0097E140 /* eflip.cpp in Sources */,
 				4C7C905C227FF9CB0097E140 /* main.cpp in Sources */,
 			);
